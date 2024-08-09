@@ -1,0 +1,26 @@
+body {
+    background-color: #f8f9fa;
+}
+
+.container {
+    margin-top: 50px;
+}
+
+.result-area {
+    min-height: 200px;
+    border: 1px solid #ced4da;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 5px;
+}
+
+.resultsList {
+    display: flex;
+    flex-wrap: wrap; /* 允许换行 */
+    gap: 10px; /* 设置间距 */
+}
+
+.resultsList > div {
+    display: flex;
+    align-items: center; /* 垂直居中对齐 */
+}
