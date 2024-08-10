@@ -169,6 +169,7 @@ $(document).ready(function () {
                 Object.keys(data).forEach(key => {
                     console.log(data)
                     const [url, status] = data[key];
+                    console.log(key,status)
                     updateStatusIcon(key, status); // 更新状态图标，根据需要调整参数
                 });
             }).catch((error) => {
@@ -185,9 +186,9 @@ $(document).ready(function () {
         async function updateStatusIcon(url_index, status) {
             let $listItem = $(`#url_index_${url_index}`)
             let $statusIcon = $(`#status_index_${url_index}`)
-            if (status === 'true') {
+            if (status === true) {
                 $statusIcon.html('✅');
-            } else if (status === 'false') {
+            } else if (status === false) {
                 $listItem.removeClass('btn-outline-success').addClass('btn-outline-danger');
                 $statusIcon.html('❌');
             } else {
