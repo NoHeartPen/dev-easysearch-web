@@ -5,7 +5,7 @@
     "search_url": "https://www.dictionary.com/browse/",
     "check_method": "get",
     "not_found_text": "No results found for",
-    "check_result": true,
+    "need_check": true,
     "auto_open": true,
     "status": "",
     "tags": "#英语, #英英"
@@ -16,32 +16,32 @@
     "search_url": "eudic://dict/",
     "check_method": "",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
     "tags": "#本地, #英语 #日语"
   },
   {
-    "base_url": "mojisho",
+    "base_url": "",
     "title": "MOJi辞書",
     "search_url": "mojisho://?search=",
     "check_method": "",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#英语, #英英"
+    "tags": "#日语, #iOS"
   },
   {
     "base_url": "",
-    "title": "EBWING",
+    "title": "EBWMac",
     "search_url": "ebmac://",
     "check_method": "",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#英语, #英英"
+    "tags": "#日语, #mac"
   },
   {
     "base_url": "mkdictionaries:///?text=",
@@ -49,10 +49,10 @@
     "title": "物书堂",
     "check_method": "",
     "not_found_text": "",
-    "check_result": false,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#日语, #物书堂"
+    "tags": "#日语, #物书堂, #Mac #iOS"
   },
   {
     "base_url": "mkdictionaries:///NDS?text=",
@@ -60,7 +60,7 @@
     "title": "物书堂日国",
     "check_method": "",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
     "tags": "#日语, #物书堂"
@@ -71,7 +71,7 @@
     "title": "Weblio辞書",
     "check_method": "get",
     "not_found_text": "見出し語は見つかりませんでした",
-    "check_result": true,
+    "need_check": true,
     "auto_open": true,
     "status": "",
     "tags": "#日语, #物书堂"
@@ -82,7 +82,7 @@
     "search_url": "https://yourei.jp/",
     "check_method": "get",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": true,
     "auto_open": true,
     "status": "",
     "tags": "#日语, #例句"
@@ -93,10 +93,10 @@
     "search_url": "https://cir.nii.ac.jp/all?q=",
     "check_method": "get",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#日语, #例句"
+    "tags": "#日语, #论文"
   },
   {
     "base_url": "https://www.jstage.jst.go.jp",
@@ -104,10 +104,10 @@
     "search_url": "https://www.jstage.jst.go.jp/result/global/-char/en?globalSearchKey=",
     "check_method": "get",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#日语, #例句"
+    "tags": "#日语, #论文"
   },
   {
     "base_url": "https://www.bilibili.com/",
@@ -115,9 +115,9 @@
     "search_url": "https://search.bilibili.com/all?keyword=",
     "check_method": "get",
     "not_found_text": "",
-    "check_result": true,
+    "need_check": false,
     "auto_open": true,
     "status": "",
-    "tags": "#日语, #例句"
+    "tags": ""
   }
 ]
