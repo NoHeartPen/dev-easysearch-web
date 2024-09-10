@@ -2,8 +2,7 @@ import json
 
 from flask import Flask, request, render_template, jsonify
 
-from check_result.check_get import get_for_url
-
+from utils.check_result.check_get import get_for_url
 app = Flask(__name__)
 
 
@@ -31,7 +30,7 @@ def do_check_result():
 def do_init_urls() -> dict:
     """
     返回初始化的网页链接配置
-    :return: dict json 格式的网页链接配置
+    :return: dict json 格式的网页链接配置文件数据
     """
     with open("static/init-url.json", "r") as f:
         data = json.load(f)
