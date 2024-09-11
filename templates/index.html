@@ -13,17 +13,29 @@
 <div class="container text-center">
     <h1>易查</h1>
 
-    <div class="form-group">
+    <div class="form-group d-flex">
         <label for="contextInput"></label>
         <textarea class="form-control" id="contextInput" placeholder="在这里输入语境..." rows="3"
                   autocomplete="false"></textarea>
+        <div class="d-flex flex-column ms-2 d-md-none">
+            <button class="btn btn-primary btn-sm mb-1" id="getWordBeforeCursor">↤</button>
+            <button class="btn btn-primary btn-sm mb-1" id="getWordAfterCursor">↦</button>
+            <button class="btn btn-primary btn-sm mb-1" id="moveCursorBefore">←</button>
+            <button class="btn btn-primary btn-sm mb-1" id="moveCursorAfter">→</button>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="d-flex align-items-center" id="want-search-container">
+            <label class="col-form-label me-2" for="" id="want-search-label">猜你想查</label>
+        </div>
     </div>
 
     <div class="form-group row">
         <label class="col-sm-3 col-form-label" for="wordInput"></label>
         <div class="col-sm-12">
             <div class="input-group">
-                <input class="form-control" id="wordInput" placeholder="输入单词..." autocomplete="false" type="text">
+                <input class="form-control" id="wordInput" placeholder="输入单词..." autocomplete="false"
+                       type="text">
                 <div class="input-group-append">
                     <button class="btn btn-primary" id="searchButton">查找</button>
                 </div>
@@ -34,9 +46,9 @@
 
     <div class="result-area mt-4">
         <form action="/search" type="post">
-        <div class="resultsList" id="resultsList">
-            <!-- 超链接将动态插入这里 -->
-        </div>
+            <div class="resultsList" id="resultsList">
+                <!-- 超链接将动态插入这里 -->
+            </div>
         </form>
     </div>
 </div>
