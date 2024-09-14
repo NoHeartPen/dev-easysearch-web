@@ -52,7 +52,7 @@ def do_init_urls() -> dict:
 def word_analyze():
     data = request.get_json()
     input_text = data.get('text', '')
-    tagger = MeCab.Tagger()
+    tagger = MeCab.Tagger("-r/dev/null /etc/mecabrc")
     jishokei_result = get_word_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
@@ -61,7 +61,7 @@ def word_analyze():
 def full_analyze():
     data = request.get_json()
     input_text = data.get('text', '')
-    tagger = MeCab.Tagger()
+    tagger = MeCab.Tagger("-r/dev/null /etc/mecabrc")
     jishokei_result = get_full_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
