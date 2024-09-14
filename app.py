@@ -1,6 +1,8 @@
 import json
 
 import MeCab
+import ipadic
+
 from flask import Flask, send_from_directory
 from flask import render_template, request, jsonify
 
@@ -52,7 +54,7 @@ def do_init_urls() -> dict:
 def word_analyze():
     data = request.get_json()
     input_text = data.get('text', '')
-    tagger = MeCab.Tagger("-r/dev/null /etc/mecabrc")
+    tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_word_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
@@ -61,7 +63,7 @@ def word_analyze():
 def full_analyze():
     data = request.get_json()
     input_text = data.get('text', '')
-    tagger = MeCab.Tagger("-r/dev/null /etc/mecabrc")
+    tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_full_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
