@@ -1,9 +1,12 @@
 import json
 
+import MeCab
 from flask import Flask, send_from_directory
 from flask import render_template, request, jsonify
 
 from utils.check_result.check_get import get_for_url
+from utils.langs.mecab_utls import get_word_jishokei,get_full_jishokei
+
 app = Flask(__name__)
 
 
@@ -43,6 +46,24 @@ def do_init_urls() -> dict:
     with open("static/init-url.json", "r") as f:
         data = json.load(f)
         return data
+
+
+@app.route('/word-analyze', methods=['POST'])
+def word_analyze():
+    data = request.get_json()
+    input_text = data.get('text', '')
+    tagger = MeCab.Tagger()
+    jishokei_result = get_word_jishokei(tagger, input_text)
+    return jsonify(jishokei_result)
+
+
+@app.route('/full-analyze', methods=['POST'])
+def full_analyze():
+    data = request.get_json()
+    input_text = data.get('text', '')
+    tagger = MeCab.Tagger()
+    jishokei_result = get_full_jishokei(tagger, input_text)
+    return jsonify(jishokei_result)
 
 
 if __name__ == '__main__':

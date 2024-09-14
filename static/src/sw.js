@@ -1,6 +1,7 @@
 const CACHE_VERSION = 'v1'; // 设置 Cache 版本
 const CACHE_NAME = `my-cache-${CACHE_VERSION}`;
 const ALLOWED_PATHS = ['/']; // 请根据需要修改允许的路径
+const ANALYZE_API = ["/word-analyze", "/full-analyze"]
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -42,11 +43,20 @@ self.addEventListener('fetch', event => {
 
     event.respondWith(
         fetch(event.request).then(response => {
-            // 网络访问成功，更新缓存
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then(cache => {
-                cache.put(event.request, responseClone).then(r => console.log("网络访问成功，更新缓存"));
-            });
+            // 检查请求是否为 GET，HTML 并在允许的路径内
+            const requestPath = requestUrl.pathname;
+            if (event.request.method === 'POST'
+                && event.request.headers.get('Content-Type').includes('application/json')
+                && ANALYZE_API.includes(requestPath)) {
+                // 不拦截调用语法分析 API
+                return response;
+            } else {
+                // 网络访问成功，更新缓存
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseClone).then(r => console.log("网络访问成功，更新缓存"));
+                });
+            }
             return response; // 返回网络响应
         }).catch(() => {
             // 如果网络访问失败，尝试从缓存中返回

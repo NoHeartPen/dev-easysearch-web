@@ -5,17 +5,17 @@ import {getCursorEnglishWord, initCreateLink} from "static/src/dom";
 var offlineNotification = document.getElementById('offline');
 
 function showIndicator() {
-  offlineNotification.innerHTML = 'You are currently offline.';
-  offlineNotification.className = 'showOfflineNotification';
+    offlineNotification.innerHTML = 'You are currently offline.';
+    offlineNotification.className = 'showOfflineNotification';
 }
 
 // Hide the offline notification when the user comes back online
 function hideIndicator() {
-  offlineNotification.className = 'hideOfflineNotification';
+    offlineNotification.className = 'hideOfflineNotification';
 }
 
 // Update the online status icon based on connectivity
-window.addEventListener('online',  hideIndicator);
+window.addEventListener('online', hideIndicator);
 window.addEventListener('offline', showIndicator);
 
 /**
@@ -95,16 +95,75 @@ function doubleClickSearch() {
 }
 
 /**
- * 渲染【猜你想查】按钮
- * @param wantSearchWord
+ *
+ *
+ * @param {string} word - The word to display on the search button.
  */
-function createWantSearchButtons(wantSearchWord) {
+function createWantSearchButton(word) {
+    $("#want-search-container").append(`
+            <button class="btn btn-primary me-2 btn-sm want-search" value="${word}">
+                ${word}
+            </button>
+        `);
+}
+
+/**
+ * 渲染【猜你想查】按钮
+ * @param  {string|Array} wantSearchWords
+ */
+function createWantSearchButtons(wantSearchWords) {
     // 移除上次添加的按钮
     $("button.want-search").remove();
-    // TODO 传入的应该一个数组
     // 渲染用户可能想查的单词的按钮
-    $("#want-search-container").append(`<button class=\"btn btn-primary me-2 btn-sm want-search\" id=\"want\" value=\"${wantSearchWord}\">${wantSearchWord}</button>`)
+    if (typeof wantSearchWords === 'string') {
+        // 如果传入的是一个字符串，那么直接渲染按钮
+        createWantSearchButton(wantSearchWords)
+    }
+    if (Array.isArray(wantSearchWords) && wantSearchWords.length > 0) {
+        wantSearchWords.forEach(word => {
+            createWantSearchButton(word);
+        });
+    }
     // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
+}
+
+async function doWordAnalyze(inputText) {
+    return await fetch('/word-analyze', {
+        method: 'POST', // 请求方法
+        headers: {
+            'Content-Type': 'application/json' // 请求头
+        },
+        body: JSON.stringify({text: inputText}) // 请求体
+    });
+}
+
+async function doFullAnalyze(inputText) {
+    return await fetch('/full-analyze', {
+        method: 'POST', // 请求方法
+        headers: {
+            'Content-Type': 'application/json' // 请求头
+        },
+        body: JSON.stringify({text: inputText}) // 请求体
+    });
+}
+
+async function analyzeRequest(inputText, analyzeType) {
+    try {
+        let response;
+        if (analyzeType === 'full') {
+            response = await doFullAnalyze(inputText);
+        } else {
+            response = await doWordAnalyze(inputText);
+        }
+        if (!response.ok) { // 检查响应是否正常
+            throw new Error('网络响应不正常');
+        }
+        const data = await response.json(); // 解析 JSON 响应
+        console.log('分析结果：', data);
+        createWantSearchButtons(data)
+    } catch (error) {
+        console.error('请求失败：', error);
+    }
 }
 
 $(document).ready(function () {
@@ -145,12 +204,43 @@ $(document).ready(function () {
     // TODO 语境框双击键盘
     doubleClickSearch()
 
-    // 双击自动查找选中的单词
-    $('#contextInput').on('dblclick', function (event) {
-        const selectedText = window.getSelection().toString();
 
-        // TODO 提取下面的方法
-        $("#wordInput").val(selectedText)
-        $('#searchButton').click();
+    function isCursorAtEnd(inputElement) {
+        return inputElement.selectionStart === inputElement.value.length;
+    }
+
+    let lastCursorPosition = -1; // 初始化光标位置
+    let intervalId;
+
+    $('#contextInput').on('focus click', async function (event) {
+        if (event.type === 'blur') {
+            // 在失去焦点时清除定时器
+            clearInterval(intervalId);
+            return;
+        }
+        // 清除之前的定时器
+        clearInterval(intervalId);
+
+        // 启动定时器检查光标位置
+        intervalId = setInterval(async () => {
+            const currentCursorPosition = this.selectionStart;
+
+            // 如果光标位置变化，调用函数
+            if (currentCursorPosition !== lastCursorPosition) {
+                lastCursorPosition = currentCursorPosition;
+                // 用户输入文字时自动提交已经输入的文字到后台进行分析
+                const contextInputText = this.value
+                if (currentCursorPosition === contextInputText.length) {
+                    console.log('光标在输入框末尾，分析所有输入的内容');
+                    await analyzeRequest(contextInputText,"full");
+                } else {
+                    const inputText = contextInputText.substring(currentCursorPosition, contextInputText.length);
+                    if (inputText.trim() !== '') {
+                        await analyzeRequest(inputText,"word");
+                    }
+                }
+            }
+        }, 500); // 每100毫秒检查一次
     });
-});
+})
+;
