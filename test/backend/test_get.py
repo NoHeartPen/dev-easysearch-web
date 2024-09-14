@@ -6,6 +6,7 @@ from utils.check_result.check_result_info import CheckResultInfo
 
 
 class MyTestCase(unittest.TestCase):
+    # TODO 修改方法名
     def test_something(self):
         self.assertEqual(
             True,

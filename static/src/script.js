@@ -2,6 +2,21 @@ import localforage from "localforage";
 import {checkResultInBackend, creatResultLinks, initializeDb} from "static/src/db";
 import {getCursorEnglishWord, initCreateLink} from "static/src/dom";
 
+var offlineNotification = document.getElementById('offline');
+
+function showIndicator() {
+  offlineNotification.innerHTML = 'You are currently offline.';
+  offlineNotification.className = 'showOfflineNotification';
+}
+
+// Hide the offline notification when the user comes back online
+function hideIndicator() {
+  offlineNotification.className = 'hideOfflineNotification';
+}
+
+// Update the online status icon based on connectivity
+window.addEventListener('online',  hideIndicator);
+window.addEventListener('offline', showIndicator);
 
 /**
  * 从数据库读取搜索链接数据，同时渲染到屏幕上。

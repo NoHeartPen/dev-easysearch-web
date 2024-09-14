@@ -6,6 +6,7 @@ module.exports = {
         path: path.resolve(__dirname, 'static/dist'), // 输出目录
     },
     mode: 'development', // 开发模式
+    devtool: 'source-map',
     resolve: {
         alias: {
             'static': path.resolve(__dirname, 'static/')

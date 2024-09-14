@@ -80,10 +80,15 @@ export async function creatResultLinks(word, $searchList) {
     }
 }
 
-
+/**
+ * 向后台提交搜索链接
+ * @param word 需要查找的单词
+ * @returns {Promise<void>}
+ */
 export async function checkResultInBackend(word) {
-    // TODO 只向后台提交最少的信息，当用构建的URL可能不是最好的选择
+    // TODO 只向后台提交最少的信息，用构建的URL可能不是最好的选择
     let needCheckLinksMap = {};
+
 
     await localforage.iterate((value, key) => {
         if (/^\d+$/.test(key) && // 默认使用纯数字作为URL链接的索引
@@ -119,7 +124,7 @@ export async function checkResultInBackend(word) {
         // 遍历返回的数据
         Object.keys(data).forEach(key => {
             console.log(data)
-            // TODO 后台只返回 id 和检查结果
+            // TODO 后台只需要返回 id 和检查结果
             const [url, status] = data[key];
             console.log(key, status)
             updateStatusIcon(key, status);
