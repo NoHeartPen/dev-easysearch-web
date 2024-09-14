@@ -1,21 +1,29 @@
 import json
 
-from flask import Flask, request, render_template, jsonify
+from flask import Flask, send_from_directory
+from flask import render_template, request, jsonify
 
 from utils.check_result.check_get import get_for_url
 app = Flask(__name__)
 
 
 @app.route('/')
-def hello_world():  # put application's code here
+def return_index():
     return render_template("index.html")
 
 
-@app.route('/search', methods=['GET', 'POST'])
+@app.route('/sw.js')
+def return_service_worker():
+    # 由于 ServiceWorker 限制，必须在网站根目录注册才能控制全局
+    return send_from_directory('static/src', 'sw.js')
+
+
+@app.route('/search', methods=['POST'])
 def do_check_result():
     try:
         input_data: list = request.get_json()
         result_data = {}
+        # TODO 多线程处理
         for item in input_data:
             if item["check_method"] == "get":
                 check_result = get_for_url(item['search_url'], headers=None, not_found_text=item['not_found_text'])
