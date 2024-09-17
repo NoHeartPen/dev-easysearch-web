@@ -1,4 +1,4 @@
-import MeCab
+import MeCab  # type: ignore
 
 from .tools.jp_tools import convert_kata_to_hira
 
@@ -43,7 +43,13 @@ def _convert_full_text_by_mecab(tagger: MeCab, input_text: str) -> list[str]:
         for parsed_result in parsed_all_result[0:-1]:
             jishokei_parsed_result = parsed_result.split("\t")[1]
             # FIXME 注意应该用第一个\t分割，如果用户输入的文字中包含【数詞】这样的词，会被误判为时解析结果
-            if "接尾," in jishokei_parsed_result or "助詞," in jishokei_parsed_result or "助動詞," in jishokei_parsed_result or "接続詞," in jishokei_parsed_result or "記号," in jishokei_parsed_result:
+            if (
+                "接尾," in jishokei_parsed_result
+                or "助詞," in jishokei_parsed_result
+                or "助動詞," in jishokei_parsed_result
+                or "接続詞," in jishokei_parsed_result
+                or "記号," in jishokei_parsed_result
+            ):
                 continue
             orth_base = jishokei_parsed_result.split(",")[6]  # 書字形基本形
             jishokei_list.append(orth_base)

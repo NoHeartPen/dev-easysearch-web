@@ -2,7 +2,7 @@ import re
 
 import requests
 
-from result_info import CountCheckResult
+from .result_info import CountCheckResult
 
 DEFAULT_HEADER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36 Edg/109.0.1518.70"
 
@@ -10,9 +10,9 @@ DEFAULT_HEADER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
 def post_url(
     url: str,
     word: str,
-    headers: str | None,
+    headers: dict | None,
     data_word_key: str | None,
-    check_text: str | None,
+    check_text: str,
 ) -> bool:
     """向网站发起 POST 请求，如果网站返回的数据中不包含指定的关键字，返回 True，否则返回 False。
 
@@ -41,11 +41,11 @@ def post_url(
 def post_with_count_check(
     url: str,
     word: str,
-    headers: str | None,
+    headers: dict | None,
     data_word_key: str | None,
-    not_found_text: str | None,
-    check_regex: str | None,
-    regex_group: str | int | None,
+    not_found_text: str,
+    check_regex: str,
+    regex_group: str,
 ) -> CountCheckResult:
     """向网站发起 POST 请求，同时使用正则表达式提取返回结果中的部分内容。
 

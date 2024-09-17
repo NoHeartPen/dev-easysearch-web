@@ -1,45 +1,43 @@
 import json
 
-import MeCab
-import ipadic
-
-from flask import Flask, send_from_directory
-from flask import render_template, request, jsonify
+import ipadic  # type: ignore
+import MeCab  # type: ignore
+from flask import Flask, jsonify, render_template, request, send_from_directory
 
 from utils.check_result.check_get import get_for_url
-from utils.langs.mecab_utls import get_word_jishokei,get_full_jishokei
+from utils.langs.mecab_utls import get_full_jishokei, get_word_jishokei
 
 app = Flask(__name__)
 
 
-@app.route('/')
+@app.route("/")
 def return_index():
     return render_template("index.html")
 
 
-@app.route('/sw.js')
+@app.route("/sw.js")
 def return_service_worker():
     # 由于 ServiceWorker 限制，必须在网站根目录注册才能控制全局
-    return send_from_directory('static/src', 'sw.js')
+    return send_from_directory("static/src", "sw.js")
 
 
-@app.route('/search', methods=['POST'])
+@app.route("/search", methods=["POST"])
 def do_check_result():
     try:
-        input_data: list = request.get_json()
+        input_data: list = request.get_json()  # type: ignore
         result_data = {}
         # TODO 多线程处理
         for item in input_data:
             if item["check_method"] == "get":
-                check_result = get_for_url(item['search_url'], headers=None, not_found_text=item['not_found_text'])
-                result_data.setdefault(item['url_index'], [item['search_url'], check_result])
+                check_result = get_for_url(item["search_url"], headers=None, not_found_text=item["not_found_text"])
+                result_data.setdefault(item["url_index"], [item["search_url"], check_result])
         return result_data
     except Exception as e:
-        print('错误:', e)
-        return jsonify({""}),
+        print("错误:", e)
+        return (jsonify({""}),)
 
 
-@app.route("/init-urls", methods=['POST'])
+@app.route("/init-urls", methods=["POST"])
 def do_init_urls() -> dict:
     """
     返回初始化的网页链接配置
@@ -50,23 +48,23 @@ def do_init_urls() -> dict:
         return data
 
 
-@app.route('/word-analyze', methods=['POST'])
+@app.route("/word-analyze", methods=["POST"])
 def word_analyze():
     data = request.get_json()
-    input_text = data.get('text', '')
+    input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_word_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
 
-@app.route('/full-analyze', methods=['POST'])
+@app.route("/full-analyze", methods=["POST"])
 def full_analyze():
     data = request.get_json()
-    input_text = data.get('text', '')
+    input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_full_jishokei(tagger, input_text)
     return jsonify(jishokei_result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run()

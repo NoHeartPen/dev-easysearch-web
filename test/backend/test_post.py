@@ -1,12 +1,13 @@
 import unittest
 
-from check_post import post_with_count_check
+from utils.check_result.check_post import post_with_count_check
+from utils.check_result.result_info import CountCheckResult
 
 
 class MyTestCase(unittest.TestCase):
     def test_post_url_with_count_check(self):
         self.assertEqual(
-            CheckResultInfo(True, True, "5"),
+            CountCheckResult(True, True, "5"),
             post_with_count_check(
                 "https://grammar.izaodao.com/grammar.php?action=search",
                 "あいだ",
@@ -18,7 +19,7 @@ class MyTestCase(unittest.TestCase):
             ),
         )
         self.assertEqual(
-            CheckResultInfo(False, False, None),
+            CountCheckResult(False, False, None),
             post_with_count_check(
                 "https://grammar.izaodao.com/grammar.php?action=search",
                 "XXXXXXXXXXXXXXXXXXXXXXXXXXX",

@@ -8,9 +8,9 @@ DEFAULT_HEADER = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (
 
 
 def get_for_url(
-        url: str,
-        headers: str | None,
-        not_found_text: str | None,
+    url: str,
+    headers: dict | None,
+    not_found_text: str,
 ) -> bool:
     """向网站发起请求，如果网站返回的数据中不包含指定的关键字，返回 True，否则返回 False。
 
@@ -29,11 +29,11 @@ def get_for_url(
 
 
 def get_url_with_count_check(
-        url: str,
-        headers: str | None,
-        not_found_text: str | None,
-        check_regex: str | None,
-        regex_group: str | int | None,
+    url: str,
+    headers: dict | None,
+    not_found_text: str,
+    check_regex: str,
+    regex_group: str | int,
 ) -> CountCheckResult:
     """向网站发起 Get 请求，同时使用正则表达式提取返回结果中的搜索结果数量。
 
@@ -62,7 +62,7 @@ def get_url_with_count_check(
         return CountCheckResult(True, False, None)
 
 
-def do_get_request(headers: str | None, url: str) -> requests.Response:
+def do_get_request(headers: dict | None, url: str) -> str:
     """向网站发起 Get 请求，返回网页内容。
     Args:
         headers: 发起请求时使用的请求头。
