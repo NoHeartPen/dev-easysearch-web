@@ -264,5 +264,31 @@ $(document).ready(function () {
             }
         }, 500);
     });
+    document.getElementById('pasteButton').addEventListener('click', async () => {
+        try {
+            document.getElementById('contextInput').value = await navigator.clipboard.readText();
+        } catch (err) {
+            console.error('无法读取剪贴板内容:', err);
+        }
+    });
+    document.getElementById('clearButton').addEventListener('click', function () {
+        document.getElementById('contextInput').value = '';
+    });
+    // 获取按钮和下拉菜单项
+    const languageButton = document.getElementById('languageButton');
+    const dropdownItems = document.querySelectorAll('.dropdown-item');
+
+    // 添加点击事件监听器
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function (event) {
+            event.preventDefault(); // 防止链接的默认行为
+            const selectedValue = this.getAttribute('data-value'); // 获取选中的值
+            // 更新按钮文本
+            languageButton.textContent = this.textContent;
+            languageButton.setAttribute('data-value', selectedValue);
+            // 这里可以根据需要使用 selectedValue 进行其他操作
+            console.log('选中的值:', selectedValue);
+        });
+    });
 })
 ;

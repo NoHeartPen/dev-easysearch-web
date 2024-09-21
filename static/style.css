@@ -52,3 +52,7 @@ body {
     display: flex;
     align-items: center; /* 垂直居中对齐 */
 }
+
+.select-language {
+    padding: 2px 2px;
+}
