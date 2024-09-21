@@ -11,6 +11,29 @@ body {
     flex-wrap: wrap;
 }
 
+.showOfflineNotification {
+    background-color: black;
+    height: 40px;
+    color: white;
+    text-align: center;
+    font-size: 20px;
+    margin-top: 0px;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    overflow: hidden;
+    z-index: 101;
+    /* 使用 flexbox 垂直居中 */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hideOfflineNotification {
+    display: none;
+}
+
 .result-area {
     min-height: 200px;
     border: 1px solid #ced4da;

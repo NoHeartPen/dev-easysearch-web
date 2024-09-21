@@ -2,21 +2,31 @@ import localforage from "localforage";
 import {checkResultInBackend, creatResultLinks, initializeDb} from "static/src/db";
 import {getCursorEnglishWord, initCreateLink} from "static/src/dom";
 
-var offlineNotification = document.getElementById('offline');
+const offlineElement = document.getElementById('offline');
 
+// 刷新页面时检查网络状态
+function checkInitialStatus() {
+    if (!navigator.onLine) {
+        showIndicator();
+    }
+}
+
+// 提示未连接网络
 function showIndicator() {
-    offlineNotification.innerHTML = 'You are currently offline.';
-    offlineNotification.className = 'showOfflineNotification';
+    offlineElement.innerHTML = '当前未连接网络';
+    offlineElement.className = 'showOfflineNotification';
 }
 
-// Hide the offline notification when the user comes back online
+// 隐藏提示
 function hideIndicator() {
-    offlineNotification.className = 'hideOfflineNotification';
+    offlineElement.className = 'hideOfflineNotification';
 }
 
-// Update the online status icon based on connectivity
+// 网络状态切换时更新提示
 window.addEventListener('online', hideIndicator);
 window.addEventListener('offline', showIndicator);
+// 刷新页面时检查网络状态
+window.addEventListener('load', checkInitialStatus);
 
 /**
  * 从数据库读取搜索链接数据，同时渲染到屏幕上。
