@@ -50,6 +50,9 @@ def do_init_urls() -> dict:
 
 @app.route("/word-analyze", methods=["POST"])
 def word_analyze():
+    """
+    分析用户输入的文本，返回其中的第一个单词。
+    """
     data = request.get_json()
     input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
@@ -59,6 +62,9 @@ def word_analyze():
 
 @app.route("/full-analyze", methods=["POST"])
 def full_analyze():
+    """
+    分析用户输入的文本，返回其中所有的单词。
+    """
     data = request.get_json()
     input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)

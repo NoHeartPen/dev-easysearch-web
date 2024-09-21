@@ -4,14 +4,14 @@ from .tools.jp_tools import convert_kata_to_hira
 
 
 def _convert_word_by_mecab(tagger: MeCab, input_text: str) -> list[str]:
-    """
+    """使用 mecab 分析输入的文本，返回第一个解析结果的辞书形。
 
     Args:
         tagger: MeCab 解析器
-        input_text:
+        input_text: 需要分析的文本。
 
     Returns:
-
+       以 [食べる,たべる] 的格式返回分析结果中辞书形。
     """
     if not input_text:
         return []
@@ -26,14 +26,14 @@ def _convert_word_by_mecab(tagger: MeCab, input_text: str) -> list[str]:
 
 
 def _convert_full_text_by_mecab(tagger: MeCab, input_text: str) -> list[str]:
-    """
+    """使用 mecab 分析输入的文本，返回除了助词和符号之外的解析结果。
 
     Args:
-        tagger: MeCab 解析器
-        input_text:
+        tagger: MeCab 解析器。
+        input_text: 需要分析的文本。
 
     Returns:
-
+        以 [御飯,食べる] 的格式返回分析结果中辞书形。
     """
     if not input_text:
         return []

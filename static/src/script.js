@@ -127,26 +127,42 @@ function createWantSearchButtons(wantSearchWords) {
     // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
 }
 
+/**
+ * 分析用户输入文本，并返回分析结果的第一个单词。
+ * @param{string} inputText 要分析的文本，应为语境框的光标后的文本。
+ * @returns {Promise<Response>}
+ */
 async function doWordAnalyze(inputText) {
     return await fetch('/word-analyze', {
-        method: 'POST', // 请求方法
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json' // 请求头
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({text: inputText}) // 请求体
+        body: JSON.stringify({text: inputText})
     });
 }
 
+/**
+ * 分析语境框内的所有内容，按照词频返回分析结果。
+ * @param inputText{string} 要分析的文本，默认应为语境框中的文本。
+ * @returns {Promise<Response>}
+ */
 async function doFullAnalyze(inputText) {
     return await fetch('/full-analyze', {
-        method: 'POST', // 请求方法
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json' // 请求头
+            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({text: inputText}) // 请求体
+        body: JSON.stringify({text: inputText})
     });
 }
 
+/**
+ * 分析文本中用户可能要查的内容。
+ * @param{string} inputText 要分析的文本。
+ * @param{string} analyzeType 分析类型，full 表示分析语句框中的所有文本。
+ * @returns {Promise<void>}
+ */
 async function analyzeRequest(inputText, analyzeType) {
     try {
         let response;
@@ -155,10 +171,10 @@ async function analyzeRequest(inputText, analyzeType) {
         } else {
             response = await doWordAnalyze(inputText);
         }
-        if (!response.ok) { // 检查响应是否正常
+        if (!response.ok) {
             throw new Error('网络响应不正常');
         }
-        const data = await response.json(); // 解析 JSON 响应
+        const data = await response.json();
         console.log('分析结果：', data);
         createWantSearchButtons(data)
     } catch (error) {
@@ -204,14 +220,10 @@ $(document).ready(function () {
     // TODO 语境框双击键盘
     doubleClickSearch()
 
-
-    function isCursorAtEnd(inputElement) {
-        return inputElement.selectionStart === inputElement.value.length;
-    }
-
     let lastCursorPosition = -1; // 初始化光标位置
     let intervalId;
 
+    // 监听语境框内的光标状态，如果变化，那么提交后台分析
     $('#contextInput').on('focus click', async function (event) {
         if (event.type === 'blur') {
             // 在失去焦点时清除定时器
@@ -224,23 +236,23 @@ $(document).ready(function () {
         // 启动定时器检查光标位置
         intervalId = setInterval(async () => {
             const currentCursorPosition = this.selectionStart;
-
             // 如果光标位置变化，调用函数
             if (currentCursorPosition !== lastCursorPosition) {
                 lastCursorPosition = currentCursorPosition;
                 // 用户输入文字时自动提交已经输入的文字到后台进行分析
                 const contextInputText = this.value
                 if (currentCursorPosition === contextInputText.length) {
-                    console.log('光标在输入框末尾，分析所有输入的内容');
-                    await analyzeRequest(contextInputText,"full");
+                    // 如果光标在语境的最后位置，分析已经输入所有内容
+                    await analyzeRequest(contextInputText, "full");
                 } else {
+                    // 如果光标不在最后，分析光标后的文本，并返回第一个单词
                     const inputText = contextInputText.substring(currentCursorPosition, contextInputText.length);
                     if (inputText.trim() !== '') {
-                        await analyzeRequest(inputText,"word");
+                        await analyzeRequest(inputText, "word");
                     }
                 }
             }
-        }, 500); // 每100毫秒检查一次
+        }, 500);
     });
 })
 ;
