@@ -7,6 +7,10 @@ body {
     max-width: 640px;
 }
 
+#want-search-container {
+    flex-wrap: wrap;
+}
+
 .result-area {
     min-height: 200px;
     border: 1px solid #ced4da;
