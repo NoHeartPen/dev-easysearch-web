@@ -37,6 +37,7 @@ function checkDb() {
         driver: localforage.INDEXEDDB, name: 'easySearch', version: 1.0, storeName: 'userData', description: '用户数据存储'
     })
 
+    let allTags = new Set(); // 用于存储所有唯一标签
     localforage.getItem("init-visit").then(function (initVisitFlag) {
         // 通过 initVisitFlag 是否为 null 或 undefined 判断是否第一次访问网站
         if (initVisitFlag === null) {
@@ -46,20 +47,92 @@ function checkDb() {
                 )
             });
         } else {
-            // FIXME 注意不管是否渲染成功，都应该添加自定义的按钮
             // FIXME 重复代码，读取数据库中存储的链接
             localforage.iterate((value, key) => {
                 // 链接以【1:{}】类似的形式存储
                 if (value !== undefined && /^\d+$/.test(key)) {
                     initCreateLink(value, key);
+                    const tags = value["tags"] ? value["tags"].split(',').map(tag => tag.trim()) : [];
+                    tags.forEach(tag => {
+                        if (!allTags.has(tag)) { // 检查标签是否已存在
+                            allTags.add(tag); // 仅在标签不存在时添加
+                        }
+                    });
                 }
-            }).catch(function (err) {
+            }).then(() => {
+                    createTagCheckboxes(allTags)
+                    // 加载选中状态
+                    loadCheckedTags();
+                    // 监听复选框变化
+                    $('.tag-checkbox').on('change', function () {
+                        filterResults();
+                    });
+                }
+            ).catch(function (err) {
                 console.error("获取 init-visit 标志时出错:", err);
             });
         }
     })
 }
 
+/**
+ * 渲染所有标签。
+ * @param allTags
+ */
+function createTagCheckboxes(allTags) {
+    allTags.forEach(tag => {
+        const tagWithoutHash = tag.replace('#', '');
+        const $checkbox = $(`
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input tag-checkbox" type="checkbox" value="${tag}" id="tag_${tagWithoutHash}" />
+                    <label class="form-check-label" for="tag_${tagWithoutHash}">${tagWithoutHash}</label>
+                </div>
+            `);
+        $('#tagCheckboxes').append($checkbox);
+    });
+}
+
+/*
+ * 监听标签复选框变化，并过滤搜索结果
+ */
+function filterResults() {
+    // 获取标签的选中状态
+    const checkedTags = $('.tag-checkbox:checked').map(function () {
+        return $(this).val();
+    }).get();
+    // 保存选中状态到 localStorage
+    localStorage.setItem('checked-tags', checkedTags.join(','));
+    // 根据选中标签过滤搜索结果
+    visibleCheckedResults(checkedTags)
+}
+
+
+/*
+ * 渲染含有相关标签的元素
+ * @param {Array} checkedTags 选中的标签
+ */
+function visibleCheckedResults(checkedTags) {
+    $('#resultsList a').each(function () {
+        const tags = $(this).data('tags').split(',');
+        const isVisible = checkedTags.length === 0 || tags.some(tag => checkedTags.includes(tag.trim()));
+        $(this).toggle(isVisible);
+    });
+}
+
+/*
+ * 加载 localStorage 中保存的选中状态
+ */
+function loadCheckedTags() {
+    const checkedTagsString = localStorage.getItem('checked-tags');
+    if (checkedTagsString) {
+        const checkedTags = checkedTagsString.split(',');
+        // 根据标签选中对应的元素
+        checkedTags.forEach(tag => {
+            $(`.tag-checkbox[value="${tag.trim()}"]`).prop('checked', true);
+        });
+        visibleCheckedResults(checkedTags);
+    }
+}
 
 /**
  * 在语境框内双击时搜索单词

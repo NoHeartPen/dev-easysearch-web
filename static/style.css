@@ -66,9 +66,9 @@ footer {
     padding: 10px 0;
 }
 
-.active{
-    background-color: var(--background-color)!important;
-    color: var(--text-color)!important;
+.active {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
 }
 
 
@@ -84,14 +84,27 @@ body {
     color: var(--text-color);
 }
 
-textarea, #wordInput, .result-area ,.modal-content{
-    background-color: var(--background-color)!important;
-    color: var(--text-color)!important;
+textarea, #wordInput, .result-area, .modal-content {
+    background-color: var(--background-color) !important;
+    color: var(--text-color) !important;
 }
 
 /* 黑暗模式样式 */
 body.dark-mode {
     --background-color: black;
     --text-color: white;
+}
+
+.tag-filter {
+    display: flex;
+}
+
+.tag-filter-label {
+    white-space: nowrap;
+}
+
+.tag-filter-container {
+    display: flex;
+    flex-wrap: wrap;
 }
 

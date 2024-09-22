@@ -251,7 +251,7 @@ export function initCreateLink(link, linkKey) {
     const $listItem = $(`
     <a class="btn btn-outline-success btn-sm" href="${link["base_url"]}" rel="noopener noreferrer"
                role="button"
-               target="_blank" id="url_index_${linkKey}">${link["title"]}</a>
+               target="_blank" id="url_index_${linkKey}" data-tags="${link["tags"]}">${link["title"]}</a>
         `);
     $('#resultsList').append($listItem);
 }
