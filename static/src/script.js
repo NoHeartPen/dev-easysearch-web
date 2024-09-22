@@ -322,7 +322,7 @@ $(document).ready(function () {
     });
     // 获取按钮和下拉菜单项
     const languageButton = document.getElementById('languageButton');
-    const dropdownItems = document.querySelectorAll('.dropdown-item');
+    const dropdownItems = document.querySelectorAll('.select-lang-div .dropdown-item');
 
     // 添加点击事件监听器
     dropdownItems.forEach(item => {
