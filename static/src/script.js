@@ -304,8 +304,18 @@ $(document).ready(function () {
             console.error('无法读取剪贴板内容:', err);
         }
     });
+    const history = []; // 用于存储文本框的历史值
     document.getElementById('clearButton').addEventListener('click', function () {
-        document.getElementById('contextInput').value = '';
+        const contextInput = document.getElementById('contextInput');
+        history.push(contextInput.value); // 保存当前值到历史数组
+        contextInput.value = ''; // 清空文本框
+    });
+
+    document.getElementById('undoButton').addEventListener('click', function () {
+        const contextInput = document.getElementById('contextInput');
+        if (history.length > 0) {
+            contextInput.value = history.pop(); // 从历史数组中恢复最后一个值
+        }
     });
     // 获取按钮和下拉菜单项
     const languageButton = document.getElementById('languageButton');
