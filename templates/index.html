@@ -50,7 +50,8 @@
         <div class="d-flex flex-column me-2">
             <button id="pasteButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-clipboard"></i></button>
             <button id="clearButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-trash"></i></button>
-            <button id="undoButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-arrow-counterclockwise"></i></button>
+            <button id="undoButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-arrow-counterclockwise"></i>
+            </button>
             <div class="btn-group dropend mb-1 select-lang-div">
                 <button type="button" class="btn btn-primary dropdown-toggle select-language" data-bs-toggle="dropdown"
                         aria-expanded="false" id="languageButton" data-value="jp">日
@@ -110,6 +111,11 @@
             <div id="search-tab-pane" class="tab-pane fade show active" role="tabpanel" aria-labelledby="search-tab"
                  tabindex="0">
                 <div class="mt-3">
+                    <div class="tag-filter">
+                        选择标签
+                        <div id="tagCheckboxes" style="display: flex; flex-wrap: wrap;"></div>
+                    </div>
+
                     <form action="/search" method="post">
                         <div class="resultsList" id="resultsList">
                             <!-- 超链接将动态插入这里 -->
@@ -150,13 +156,45 @@
 <script src="/static/dist/bundle.js"></script>
 <script async>
     if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/sw.js')
-            .then(registration => {
-                console.log('Service Worker registered with scope:', registration.scope);
-            })
-            .catch(error => {
-                console.error('Service Worker registration failed:', error);
+        navigator.serviceWorker.getRegistrations().then(registrations => {
+            let isRegistered = false;
+
+            // 检查是否已经注册了同名的 Service Worker
+            registrations.forEach(registration => {
+                if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
+                    isRegistered = true;
+                    console.log('Service Worker already registered:', registration.scope);
+                }
             });
+
+            // 如果没有注册同名的 Service Worker，则进行注册
+            if (!isRegistered) {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered with scope:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.error('Service Worker registration failed:', error);
+                    });
+            } else {
+                // 如果已注册，选择注销旧的 Service Worker
+                registrations.forEach(registration => {
+                    if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
+                        registration.unregister().then(() => {
+                            console.log('Old Service Worker unregistered:', registration.scope);
+                            // 重新注册新的 Service Worker
+                            navigator.serviceWorker.register('/sw.js')
+                                .then(newRegistration => {
+                                    console.log('New Service Worker registered with scope:', newRegistration.scope);
+                                })
+                                .catch(error => {
+                                    console.error('New Service Worker registration failed:', error);
+                                });
+                        });
+                    }
+                });
+            }
+        });
     }
 </script>
 </body>

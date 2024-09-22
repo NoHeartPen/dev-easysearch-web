@@ -43,6 +43,9 @@ self.addEventListener('fetch', event => {
 
     event.respondWith(
         fetch(event.request).then(response => {
+            if (!response || response.status !== 200) {
+                throw new Error('Network response was not ok');
+            }
             // 检查请求是否为 GET，HTML 并在允许的路径内
             const requestPath = requestUrl.pathname;
             if (event.request.method === 'POST'
@@ -51,7 +54,7 @@ self.addEventListener('fetch', event => {
                 // 不拦截调用语法分析 API
                 return response;
             } else if (event.request.method === 'POST'
-                && requestPath === "/init-urls"){
+                && requestPath === "/init-urls") {
                 // 不拦截请求初始化数据库的 API
                 return response;
             } else {
