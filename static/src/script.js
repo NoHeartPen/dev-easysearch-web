@@ -175,6 +175,9 @@ async function doFullAnalyze(inputText) {
  */
 async function analyzeRequest(inputText, analyzeType) {
     try {
+        if (inputText.trim() === '') {
+            return;
+        }
         let response;
         if (analyzeType === 'full') {
             response = await doFullAnalyze(inputText);
