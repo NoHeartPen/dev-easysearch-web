@@ -50,6 +50,10 @@ self.addEventListener('fetch', event => {
                 && ANALYZE_API.includes(requestPath)) {
                 // 不拦截调用语法分析 API
                 return response;
+            } else if (event.request.method === 'POST'
+                && requestPath === "/init-urls"){
+                // 不拦截请求初始化数据库的 API
+                return response;
             } else {
                 // 网络访问成功，更新缓存
                 const responseClone = response.clone();
