@@ -85,7 +85,7 @@ body {
     color: var(--text-color);
 }
 
-textarea, input, .result-area ,.modal-content{
+textarea, #wordInput, .result-area ,.modal-content{
     background-color: var(--background-color)!important;
     color: var(--text-color)!important;
 }
