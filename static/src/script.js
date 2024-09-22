@@ -192,8 +192,41 @@ async function analyzeRequest(inputText, analyzeType) {
     }
 }
 
+/**
+ * 切换黑暗模式
+ */
+function switchDarkMode() {
+    // 检查localStorage中的模式设置
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        $(".result-area").addClass("dark-mode");
+        $("#contextInput").addClass("dark-mode");
+    }
+
+    // 切换黑暗模式的函数
+    document.getElementById('toggleDarkMode').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        $(".result-area").toggleClass("dark-mode");
+        $("#contextInput").toggleClass("dark-mode");
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('darkMode', 'enabled');
+        } else {
+            localStorage.setItem('darkMode', 'disabled');
+        }
+    });
+}
+
 $(document).ready(function () {
     checkDb();
+
+    switchDarkMode();
+
+    // 打开设置弹窗
+    document.getElementById('settingsButton').addEventListener('click', () => {
+        const settingsModal = new bootstrap.Modal(document.getElementById('settingsModal'));
+        settingsModal.show();
+    });
 
     $('#searchButton').on('click', function () {
         const word = $('#wordInput').val();

@@ -62,7 +62,33 @@ footer {
     bottom: 0;
     left: 0;
     right: 0;
-    color: black;
+    color: var(--text-color);
     text-align: center;
     padding: 10px 0;
 }
+
+
+:root {
+    --background-color: white;
+    --text-color: black;
+    --input-background-color: white;
+    --input-text-color: black;
+}
+
+body {
+    background-color: var(--background-color);
+    color: var(--text-color);
+    color: var(--text-color);
+}
+
+textarea, input, .result-area ,.modal-content{
+    background-color: var(--background-color)!important;
+    color: var(--text-color)!important;
+}
+
+/* 黑暗模式样式 */
+body.dark-mode {
+    --background-color: black;
+    --text-color: white;
+}
+

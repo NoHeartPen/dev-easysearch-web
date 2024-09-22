@@ -14,6 +14,30 @@
 <body>
 
 <div class="container text-center">
+    <div class="d-flex justify-content-end">
+        <div id="settingsButton" class="ml-auto"><i class="bi bi-sliders"></i></div>
+    </div>
+    <!-- 设置选项 -->
+    <div id="settingsModal" class="modal fade" tabindex="-1" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="settingsModalLabel">设置</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <button id="toggleDarkMode" class="btn btn-primary btn-sm "><i
+                                class="bi bi-brightness-high"></i>黑暗模式
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <div id="offline"></div>
     <h1>易查</h1>
 
@@ -22,7 +46,7 @@
         <div class="d-flex flex-column me-2">
             <button id="pasteButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-clipboard"></i></button>
             <button id="clearButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-trash"></i></button>
-            <div class="btn-group dropend">
+            <div class="btn-group dropend mb-1">
                 <button type="button" class="btn btn-primary dropdown-toggle select-language" data-bs-toggle="dropdown"
                         aria-expanded="false" id="languageButton" data-value="jp">日
                 </button>
@@ -53,8 +77,8 @@
             <div class="input-group">
                 <input class="form-control" id="wordInput" placeholder="输入单词..." autocomplete="false"
                        type="text">
-                <div class="input-group-append">
-                    <button class="btn btn-primary" id="searchButton">查找</button>
+                <div class="input-group-append ms-2">
+                    <button class="btn btn-primary" id="searchButton"><i class="bi bi-search"></i></button>
                 </div>
             </div>
         </div>
