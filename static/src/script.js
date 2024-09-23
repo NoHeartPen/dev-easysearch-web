@@ -249,6 +249,8 @@ async function doFullAnalyze(inputText) {
 async function analyzeRequest(inputText, analyzeType) {
     try {
         if (inputText.trim() === '') {
+            // 如果输入框为空，则清除【猜你想查】按钮，同时不向后台发起请求。
+            $("button.want-search").remove();
             return;
         }
         let response;
