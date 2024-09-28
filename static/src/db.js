@@ -1,7 +1,7 @@
 // 数据库相关操作
 
 import localforage from "localforage";
-import {createResultLink, initCreateLink, initCreateTags} from "static/src/dom";
+import {createResultLink, initCreateLink, initCreateTags, visibleCheckedResults} from "static/src/dom";
 import {doSearch} from "static/src/apifetch";
 
 /**
