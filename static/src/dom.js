@@ -229,7 +229,7 @@ export function createResultLink(value, key, word, $searchList) {
     if (value !== undefined && /^\d+$/.test(key)) {
         const $listItem = $(`
             <a class="btn btn-outline-success btn-sm" href="${value["search_url"]}${word}" rel="noopener noreferrer"
-               role="button"
+               role="button" data-tags="${value["tags"]}"
                target="_blank" id="url_index_${key}">${value["title"]}<span class="status-icon" id="status_index_${key}">?</span></a>
         `);
         $searchList.append($listItem);
@@ -524,13 +524,17 @@ function clickSearchButton() {
     $resultsList.empty();
     // 显示结果区域
     $('.result-area').show();
+
     // 基于数据库重新构建搜索链接，链接构建成功后，再向后台提交搜索结果
     creatResultLinks(word, $resultsList).then(() => {
+            // 重新构建链接后只显示含有相关标签的元素
+            filterResults();
             checkResultInBackend(word).then(checkResults => {
                 updateStatusIcons(checkResults)
             })
         }
     )
+
 }
 
 /**
