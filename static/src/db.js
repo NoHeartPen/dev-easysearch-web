@@ -1,7 +1,8 @@
 // 数据库相关操作
 
 import localforage from "localforage";
-import {createResultLink, initCreateLink, initCreateTags, updateStatusIcon} from "static/src/dom";
+import {createResultLink, initCreateLink, initCreateTags} from "static/src/dom";
+import {doSearch} from "static/src/apifetch";
 
 /**
  *  获取初默认的链接 JSON 配置文件
@@ -84,8 +85,6 @@ export async function creatResultLinks(word, $searchList) {
 export async function checkResultInBackend(word) {
     // TODO 只向后台提交最少的信息，用构建的URL可能不是最好的选择
     let needCheckLinksMap = {};
-
-
     await localforage.iterate((value, key) => {
         if (/^\d+$/.test(key) && // 默认使用纯数字作为URL链接的索引
             value["need_check"] !== false && // 不检查网站是否存在相关搜索结果
@@ -109,25 +108,11 @@ export async function checkResultInBackend(word) {
             not_found_text: data.not_found_text
         };
     });
-
-
-    // 向后台提交所有需要检查搜索结果的网站链接
-    fetch('/search', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json',},
-        body: JSON.stringify(needCheckLinks),
-    }).then(response => response.json()).then(data => {
-        // 遍历返回的数据
-        Object.keys(data).forEach(key => {
-            console.log(data)
-            // TODO 后台只需要返回 id 和检查结果
-            const [url, status] = data[key];
-            console.log(key, status)
-            updateStatusIcon(key, status);
-        });
-    }).catch((error) => {
-        console.error('错误 :', error);
-    });
+    let response = await doSearch(needCheckLinks);
+    if (!response.ok) {
+        throw new Error('网络响应不正常');
+    }
+    return response.json();
 }
 
 /**
@@ -137,19 +122,21 @@ export async function checkResultInBackend(word) {
 export function showUrlAllInfo(index) {
     localforage.getItem(`${index}`).then(function (data) {
         // 填充模态弹窗内容
-        document.getElementById('index_id').value = index;
-        document.getElementById('title').value = data.title || '';
-        document.getElementById('base_url').value = data.base_url || '';
-        document.getElementById('search_url').value = data.search_url || '';
-        document.getElementById('check_method').value = data.check_method || 'get';
-        document.getElementById('not_found_text').value = data.not_found_text || '';
-        document.getElementById('need_check').checked = data.need_check || false;
-        document.getElementById('auto_open').checked = data.auto_open || false;
-        document.getElementById('tags').value = data.tags || '';
-        document.getElementById('show_in_start').checked = data.show_in_start || false;
-        document.getElementById('no_result_not_show').checked = data.no_result_not_show || false;
+        // 填充模态弹窗内容
+        $('#index_id').val(index);
+        $('#title').val(data.title || '');
+        $('#base_url').val(data.base_url || '');
+        $('#search_url').val(data.search_url || '');
+        $('#check_method').val(data.check_method || 'get');
+        $('#not_found_text').val(data.not_found_text || '');
+        $('#need_check').prop('checked', data.need_check || false);
+        $('#auto_open').prop('checked', data.auto_open || false);
+        $('#tags').val(data.tags || '');
+        $('#show_in_start').prop('checked', data.show_in_start || false);
+        $('#no_result_not_show').prop('checked', data.no_result_not_show || false);
+
         // 显示模态弹窗
-        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+        const modal = new bootstrap.Modal($('#dataModal')[0]);
         modal.show();
     }).catch(function (err) {
         console.error('查询数据时出错:', err);
@@ -215,7 +202,11 @@ export function processTagsAndLinks() {
  */
 export function checkDb() {
     localforage.config({
-        driver: localforage.INDEXEDDB, name: 'easySearch', version: 1.0, storeName: 'userData', description: '用户数据存储'
+        driver: localforage.INDEXEDDB,
+        name: 'easySearch',
+        version: 1.0,
+        storeName: 'userData',
+        description: '用户数据存储'
     })
     localforage.getItem("init-visit").then(function (initVisitFlag) {
         // 通过 initVisitFlag 是否为 null 或 undefined 判断是否第一次访问网站
@@ -229,4 +220,17 @@ export function checkDb() {
             processTagsAndLinks();
         }
     })
+} /*
+ * 加载 localStorage 中保存的选中状态
+ */
+export function loadCheckedTags() {
+    const checkedTagsString = localStorage.getItem('checked-tags');
+    if (checkedTagsString) {
+        const checkedTags = checkedTagsString.split(',');
+        // 根据标签选中对应的元素
+        checkedTags.forEach(tag => {
+            $(`.tag-checkbox[value="${tag.trim()}"]`).prop('checked', true);
+        });
+        visibleCheckedResults(checkedTags);
+    }
 }

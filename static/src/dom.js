@@ -1,6 +1,7 @@
 // DOM相关操作
 
-import {showUrlAllInfo, updateData2Db} from "static/src/db";
+import {checkResultInBackend, creatResultLinks, loadCheckedTags, showUrlAllInfo, updateData2Db} from "static/src/db";
+import {doFullAnalyze, doWordAnalyze} from "static/src/apifetch";
 
 /**
  * 获取光标处附近的英文单词
@@ -118,16 +119,6 @@ $("#getWordAfterCursor").on('click', function () {
     $input.focus();
 })
 
-
-/**
- * 【猜你想查】按钮触发搜索事件
- */
-$("#want-search-container").on("click", "button.want-search", function () {
-    const wantSearchWord = $(this).val()
-    // TODO 提取下面的方法
-    $("#wordInput").val(wantSearchWord)
-    $('#searchButton').click();
-})
 
 /*
 将语境框内的光标向前移动一个单词
@@ -265,10 +256,20 @@ export function initCreateLink(link, linkKey) {
 
 /**
  * 根据服务器返回的检查结果重新渲染对应的链接元素
+ * @param data{Object} 服务器返回的检查结果数据
+ */
+function updateStatusIcons(data) {
+    Object.keys(data).forEach(key => {
+        updateStatusIcon(key, data[key][1]);
+    });
+}
+
+/**
+ * 渲染对应的链接元素
  * @param url_index 链接的索引，和已经渲染好的 DOM 元素的 ID 保持一致
  * @param status 链接的检查结果
  */
-export async function updateStatusIcon(url_index, status) {
+function updateStatusIcon(url_index, status) {
     let $listItem = $(`#url_index_${url_index}`)
     let $statusIcon = $(`#status_index_${url_index}`)
     if (status === true) {
@@ -283,54 +284,49 @@ export async function updateStatusIcon(url_index, status) {
     }
 }
 
+/**
+ * 【猜你想查】按钮触发搜索事件
+ */
+$("#want-search-container").on("click", "button.want-search", function () {
+    const wantSearchWord = $(this).val()
+    // TODO 提取下面的方法
+    $("#wordInput").val(wantSearchWord)
+    $('#searchButton').click();
+})
+
 // 点击编辑界面的表格时显示对应的编辑界面
-document.getElementById('table-url-links-container').addEventListener('click', function (event) {
-    // 确保点击的是单元格
-    if (event.target && event.target.nodeName === 'TD') {
-        // 获取父行的 DOM id 并提取 id 中的数字作为查找的索引
-        const rowId = event.target.parentElement.id;
-        // FIXME 下面的正则表达式应该是用
-        const index = rowId.match(/\d+/)[0];
-        showUrlAllInfo(index);
-    }
+$('#table-url-links-container').on('click', 'td', function () {
+    // 获取父行的 DOM id 并提取 id 中的数字作为查找的索引
+    const rowId = $(this).closest('tr').attr('id');
+    const index = rowId.match(/\d+/)[0];
+    showUrlAllInfo(index);
 });
 
-// 保存编辑后的信息
-document.getElementById('saveChanges').addEventListener('click', function () {
-    const rowId = document.getElementById('index_id').value;
+// 点击保存按钮，保存编辑后的信息
+$('#saveChanges').on('click', function () {
+    const rowId = $('#index_id').val();
     const index = rowId.match(/\d+/)[0];
     // 创建一个对象来保存更改后的数据
     const updatedData = {
-        base_url: document.getElementById('base_url').value,
-        title: document.getElementById('title').value,
-        search_url: document.getElementById('search_url').value,
-        check_method: document.getElementById('check_method').value,
-        not_found_text: document.getElementById('not_found_text').value,
-        need_check: document.getElementById('need_check').checked,
-        auto_open: document.getElementById('auto_open').checked,
-        tags: document.getElementById('tags').value,
-        show_in_start: document.getElementById('show_in_start').checked,
-        no_result_not_show: document.getElementById('no_result_not_show').checked,
+        base_url: $('#base_url').val(),
+        title: $('#title').val(),
+        search_url: $('#search_url').val(),
+        check_method: $('#check_method').val(),
+        not_found_text: $('#not_found_text').val(),
+        need_check: $('#need_check').is(':checked'),
+        auto_open: $('#auto_open').is(':checked'),
+        tags: $('#tags').val(),
+        show_in_start: $('#show_in_start').is(':checked'),
+        no_result_not_show: $('#no_result_not_show').is(':checked'),
     };
     updateData2Db(index, updatedData);
-});
-
-// 监听模态框关闭事件
-const myModalEl = document.getElementById('dataModal');
-myModalEl.addEventListener('hidden.bs.modal', function () {
-    // 重置「高级设置」的折叠状态
-    const collapseElement = document.getElementById('collapseOne');
-    const bsCollapse = new bootstrap.Collapse(collapseElement, {
-        toggle: false // 不自动切换状态
-    });
-    bsCollapse.hide(); // 隐藏折叠部分
 });
 
 /**
  * 渲染所有标签。
  * @param allTags{Set}
  */
-export function createTagCheckboxes(allTags) {
+function createTagCheckboxes(allTags) {
     $('#tagCheckboxes').empty();
     allTags.forEach(tag => {
         const tagWithoutHash = tag.replace('#', '');
@@ -347,7 +343,7 @@ export function createTagCheckboxes(allTags) {
 /*
  * 监听标签复选框变化，并过滤搜索结果
  */
-export function filterResults() {
+function filterResults() {
     // 获取标签的选中状态
     const checkedTags = $('.tag-checkbox:checked').map(function () {
         return $(this).val();
@@ -362,7 +358,7 @@ export function filterResults() {
  * 渲染含有相关标签的元素
  * @param {Array} checkedTags 选中的标签
  */
-function visibleCheckedResults(checkedTags) {
+export function visibleCheckedResults(checkedTags) {
     $('#resultsList a').each(function () {
         const tags = $(this).data('tags').split(',');
         const isVisible = checkedTags.length === 0 || tags.some(tag => checkedTags.includes(tag.trim()));
@@ -370,39 +366,25 @@ function visibleCheckedResults(checkedTags) {
     });
 }
 
-/*
- * 加载 localStorage 中保存的选中状态
- */
-export function loadCheckedTags() {
-    const checkedTagsString = localStorage.getItem('checked-tags');
-    if (checkedTagsString) {
-        const checkedTags = checkedTagsString.split(',');
-        // 根据标签选中对应的元素
-        checkedTags.forEach(tag => {
-            $(`.tag-checkbox[value="${tag.trim()}"]`).prop('checked', true);
-        });
-        visibleCheckedResults(checkedTags);
-    }
-}
-
 /**
  * 切换黑暗模式
  */
-export function switchDarkMode() {
+function switchDarkMode() {
     // 检查localStorage中的模式设置
     const darkMode = localStorage.getItem('darkMode');
     if (darkMode === 'enabled') {
-        document.body.classList.add('dark-mode');
+        $('body').addClass('dark-mode');
         $(".result-area").addClass("dark-mode");
         $("#contextInput").addClass("dark-mode");
     }
 
     // 切换黑暗模式的函数
-    document.getElementById('toggleDarkMode').addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
+    $('#toggleDarkMode').on('click', () => {
+        const $body = $('body');
+        $body.toggleClass('dark-mode');
         $(".result-area").toggleClass("dark-mode");
         $("#contextInput").toggleClass("dark-mode");
-        if (document.body.classList.contains('dark-mode')) {
+        if ($body.hasClass('dark-mode')) {
             localStorage.setItem('darkMode', 'enabled');
         } else {
             localStorage.setItem('darkMode', 'disabled');
@@ -411,10 +393,22 @@ export function switchDarkMode() {
 }
 
 /**
+ * 创建「猜你想查」按钮
+ * @param {string} word
+ */
+function createWantSearchButton(word) {
+    $("#want-search-container").append(`
+            <button class="btn btn-primary me-2 btn-sm want-search" value="${word}">
+                ${word}
+            </button>
+        `);
+}
+
+/**
  * 渲染【猜你想查】按钮
  * @param  {string|Array} wantSearchWords
  */
-export function createWantSearchButtons(wantSearchWords) {
+function createWantSearchButtons(wantSearchWords) {
     // 移除上次添加的按钮
     $("button.want-search").remove();
     // 渲染用户可能想查的单词的按钮
@@ -430,8 +424,8 @@ export function createWantSearchButtons(wantSearchWords) {
     // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
 }
 
-export function autoSwitchOfflineMode() {
-    const offlineElement = document.getElementById('offline');
+function autoSwitchOfflineMode() {
+    const $offlineElement = $('#offline');
 
     // 刷新页面时检查网络状态
     function checkInitialStatus() {
@@ -442,26 +436,26 @@ export function autoSwitchOfflineMode() {
 
     // 提示未连接网络
     function showIndicator() {
-        offlineElement.innerHTML = '当前未连接网络';
-        offlineElement.className = 'showOfflineNotification';
+        $offlineElement.html('当前未连接网络').addClass('showOfflineNotification');
     }
 
     // 隐藏提示
     function hideIndicator() {
-        offlineElement.className = 'hideOfflineNotification';
+        $offlineElement.removeClass('showOfflineNotification').addClass('hideOfflineNotification');
     }
 
     // 网络状态切换时更新提示
-    window.addEventListener('online', hideIndicator);
-    window.addEventListener('offline', showIndicator);
+    $(window).on('online', hideIndicator);
+    $(window).on('offline', showIndicator);
+
     // 刷新页面时检查网络状态
-    window.addEventListener('load', checkInitialStatus);
+    $(window).on('load', checkInitialStatus);
 }
 
 /**
  * 在语境框内双击时搜索单词
  */
-export function doubleClickSearch() {
+function doubleClickSearch() {
     // TODO 参数是自定义的按钮代码，注意使用枚举的类型
     const doubleClickKeyName = "Shift"
     const $textarea = $('#contextInput');
@@ -503,7 +497,7 @@ export function doubleClickSearch() {
 
 
 /**
- *
+ *　基于IDB的数据初始化标签
  * @param allTags{Set}
  */
 export function initCreateTags(allTags) {
@@ -515,3 +509,169 @@ export function initCreateTags(allTags) {
         filterResults();
     });
 }
+
+/**
+ * 点击搜索按钮时调用 Search API判断结果后渲染链接
+ */
+function clickSearchButton() {
+    const word = $('#wordInput').val();
+    // 未输入文字时不搜索
+    if (word === "") {
+        return
+    }
+    const $resultsList = $('#resultsList');
+    // 清空现有的搜索结果
+    $resultsList.empty();
+    // 显示结果区域
+    $('.result-area').show();
+    // 基于数据库重新构建搜索链接，链接构建成功后，再向后台提交搜索结果
+    creatResultLinks(word, $resultsList).then(() => {
+            checkResultInBackend(word).then(checkResults => {
+                updateStatusIcons(checkResults)
+            })
+        }
+    )
+}
+
+/**
+ * 监听光标位置变化，并分析用户可能要查的内容。
+ */
+function monitorCursorPositionAndAnalyze() {
+    let lastCursorPosition = -1; // 初始化光标位置
+    let intervalId;
+    // 监听语境框内的光标状态，如果变化，那么提交后台分析
+    $('#contextInput').on('focus click', async function (event) {
+        if (event.type === 'blur') {
+            // 在失去焦点时清除定时器
+            clearInterval(intervalId);
+            return;
+        }
+        // 清除之前的定时器
+        clearInterval(intervalId);
+
+        // 启动定时器检查光标位置
+        intervalId = setInterval(async () => {
+            const currentCursorPosition = this.selectionStart;
+            // 如果光标位置变化，调用函数
+            if (currentCursorPosition !== lastCursorPosition) {
+                lastCursorPosition = currentCursorPosition;
+                // 用户输入文字时自动提交已经输入的文字到后台进行分析
+                const contextInputText = this.value
+                if (currentCursorPosition === contextInputText.length) {
+                    // 如果光标在语境的最后位置，分析已经输入所有内容
+                    await analyzeRequest(contextInputText, "full");
+                } else {
+                    // 如果光标不在最后，分析光标后的文本，并返回第一个单词
+                    const inputText = contextInputText.substring(currentCursorPosition, contextInputText.length);
+                    if (inputText.trim() !== '') {
+                        await analyzeRequest(inputText, "word");
+                    }
+                }
+            }
+        }, 500);
+    });
+}
+
+export function initializeEvents() {
+    switchDarkMode();
+    autoSwitchOfflineMode();
+    // 打开设置弹窗
+    $('#settingsButton').on('click', () => {
+        const settingsModal = new bootstrap.Modal($('#settingsModal')[0]);
+        settingsModal.show();
+    });
+
+    $('#searchButton').on('click', function () {
+        clickSearchButton();
+    });
+
+    // 搜索框内按回车触发搜索事件
+    $('#wordInput').keydown(function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            // 模拟点击查找按钮
+            $('#searchButton').click();
+        }
+    });
+
+    // 语境框双击键盘触发搜索事件
+    doubleClickSearch()
+    // 监听语境框内光标位置变化
+    monitorCursorPositionAndAnalyze();
+
+    // 监听模态框关闭事件
+    $('#dataModal').on('hidden.bs.modal', function () {
+        // 重置「高级设置」的折叠状态
+        $('#collapseOne').collapse('hide'); // 隐藏折叠部分
+    });
+
+    // 监听粘贴按钮
+    $('#pasteButton').on('click', async () => {
+        try {
+            $('#contextInput').val(await navigator.clipboard.readText());
+        } catch (err) {
+            console.error('无法读取剪贴板内容:', err);
+        }
+    });
+
+    // 监听清空按钮
+    const history = []; // 用于存储文本框的历史值
+    $('#clearButton').on('click', function () {
+        const contextInput = $('#contextInput');
+        history.push(contextInput.val()); // 保存当前值到历史数组
+        contextInput.val(''); // 清空文本框
+    });
+
+    // 监听撤销按钮
+    $('#undoButton').on('click', function () {
+        const contextInput = $('#contextInput');
+        if (history.length > 0) {
+            contextInput.val(history.pop()); // 从历史数组中恢复最后一个值
+        }
+    });
+
+    // 添加点击事件监听器
+    $('.select-lang-div .dropdown-item').on('click', function (event) {
+        // 防止链接的默认行为
+        event.preventDefault();
+        const selectedValue = $(this).data('value');
+        // 获取按钮和下拉菜单项
+        const $languageButton = $('#languageButton');
+        $languageButton.text($(this).text());
+        // 更新按钮文本
+        $languageButton.data('value', selectedValue);
+        // 这里可以根据需要使用 selectedValue 进行其他操作
+        console.log('选中的值:', selectedValue);
+    });
+}
+
+/**
+ * 分析文本中用户可能要查的内容。
+ * @param{string} inputText 要分析的文本。
+ * @param{string} analyzeType 分析类型，full 表示分析语句框中的所有文本。
+ * @returns {Promise<void>}
+ */
+async function analyzeRequest(inputText, analyzeType) {
+    try {
+        if (inputText.trim() === '') {
+            // 如果输入框为空，则清除【猜你想查】按钮，同时不向后台发起请求。
+            $("button.want-search").remove();
+            return;
+        }
+        let response;
+        if (analyzeType === 'full') {
+            response = await doFullAnalyze(inputText);
+        } else {
+            response = await doWordAnalyze(inputText);
+        }
+        if (!response.ok) {
+            console.error('网络响应不正常');
+        }
+        const data = await response.json();
+        console.log('分析结果：', data);
+        createWantSearchButtons(data)
+    } catch (error) {
+        console.error('请求失败：', error);
+    }
+}
+

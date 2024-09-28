@@ -1,7 +1,7 @@
 const CACHE_VERSION = 'v1'; // 设置 Cache 版本
 const CACHE_NAME = `my-cache-${CACHE_VERSION}`;
 const ALLOWED_PATHS = ['/']; // 请根据需要修改允许的路径
-const ANALYZE_API = ["/word-analyze", "/full-analyze"]
+const EASYSEARCH_API = ["/word-analyze", "/full-analyze","/search"]
 
 self.addEventListener('install', event => {
     event.waitUntil(
@@ -62,7 +62,7 @@ self.addEventListener('fetch', event => {
                 const requestPath = requestUrl.pathname;
                 if (event.request.method === 'POST'
                     && event.request.headers.get('Content-Type').includes('application/json')
-                    && ANALYZE_API.includes(requestPath)) {
+                    && EASYSEARCH_API.includes(requestPath)) {
                     // 不拦截调用语法分析 API
                     return response;
                 } else if (event.request.method === 'POST'
