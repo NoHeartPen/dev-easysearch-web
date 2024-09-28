@@ -1,4 +1,7 @@
 // DOM相关操作
+
+import {showUrlAllInfo, updateData2Db} from "static/src/db";
+
 /**
  * 获取光标处附近的英文单词
  * @param $textarea
@@ -248,12 +251,16 @@ export function createResultLink(value, key, word, $searchList) {
  * @param linkKey 链接的索引
  */
 export function initCreateLink(link, linkKey) {
+    // 查词页面显示的数据
     const $listItem = $(`
     <a class="btn btn-outline-success btn-sm" href="${link["base_url"]}" rel="noopener noreferrer"
                role="button"
                target="_blank" id="url_index_${linkKey}" data-tags="${link["tags"]}">${link["title"]}</a>
         `);
     $('#resultsList').append($listItem);
+    // 编辑页面显示的数据
+    const $tableItem = $(`<tr class="table-url-link" id="table_url_index_${linkKey}""><td>${link["title"]}</td><td></td></tr>`)
+    $('#table-url-links-container').append($tableItem);
 }
 
 /**
@@ -274,4 +281,237 @@ export async function updateStatusIcon(url_index, status) {
         $listItem.removeClass('btn-outline-success').addClass('btn-outline-warning');
         $statusIcon.html('⚠️');
     }
+}
+
+// 点击编辑界面的表格时显示对应的编辑界面
+document.getElementById('table-url-links-container').addEventListener('click', function (event) {
+    // 确保点击的是单元格
+    if (event.target && event.target.nodeName === 'TD') {
+        // 获取父行的 DOM id 并提取 id 中的数字作为查找的索引
+        const rowId = event.target.parentElement.id;
+        // FIXME 下面的正则表达式应该是用
+        const index = rowId.match(/\d+/)[0];
+        showUrlAllInfo(index);
+    }
+});
+
+// 保存编辑后的信息
+document.getElementById('saveChanges').addEventListener('click', function () {
+    const rowId = document.getElementById('index_id').value;
+    const index = rowId.match(/\d+/)[0];
+    // 创建一个对象来保存更改后的数据
+    const updatedData = {
+        base_url: document.getElementById('base_url').value,
+        title: document.getElementById('title').value,
+        search_url: document.getElementById('search_url').value,
+        check_method: document.getElementById('check_method').value,
+        not_found_text: document.getElementById('not_found_text').value,
+        need_check: document.getElementById('need_check').checked,
+        auto_open: document.getElementById('auto_open').checked,
+        tags: document.getElementById('tags').value,
+        show_in_start: document.getElementById('show_in_start').checked,
+        no_result_not_show: document.getElementById('no_result_not_show').checked,
+    };
+    updateData2Db(index, updatedData);
+});
+
+// 监听模态框关闭事件
+const myModalEl = document.getElementById('dataModal');
+myModalEl.addEventListener('hidden.bs.modal', function () {
+    // 重置「高级设置」的折叠状态
+    const collapseElement = document.getElementById('collapseOne');
+    const bsCollapse = new bootstrap.Collapse(collapseElement, {
+        toggle: false // 不自动切换状态
+    });
+    bsCollapse.hide(); // 隐藏折叠部分
+});
+
+/**
+ * 渲染所有标签。
+ * @param allTags{Set}
+ */
+export function createTagCheckboxes(allTags) {
+    $('#tagCheckboxes').empty();
+    allTags.forEach(tag => {
+        const tagWithoutHash = tag.replace('#', '');
+        const $checkbox = $(`
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input tag-checkbox" type="checkbox" value="${tag}" id="tag_${tagWithoutHash}" />
+                    <label class="form-check-label" for="tag_${tagWithoutHash}">${tagWithoutHash}</label>
+                </div>
+            `);
+        $('#tagCheckboxes').append($checkbox);
+    });
+}
+
+/*
+ * 监听标签复选框变化，并过滤搜索结果
+ */
+export function filterResults() {
+    // 获取标签的选中状态
+    const checkedTags = $('.tag-checkbox:checked').map(function () {
+        return $(this).val();
+    }).get();
+    // 保存选中状态到 localStorage
+    localStorage.setItem('checked-tags', checkedTags.join(','));
+    // 根据选中标签过滤搜索结果
+    visibleCheckedResults(checkedTags)
+}
+
+/*
+ * 渲染含有相关标签的元素
+ * @param {Array} checkedTags 选中的标签
+ */
+function visibleCheckedResults(checkedTags) {
+    $('#resultsList a').each(function () {
+        const tags = $(this).data('tags').split(',');
+        const isVisible = checkedTags.length === 0 || tags.some(tag => checkedTags.includes(tag.trim()));
+        $(this).toggle(isVisible);
+    });
+}
+
+/*
+ * 加载 localStorage 中保存的选中状态
+ */
+export function loadCheckedTags() {
+    const checkedTagsString = localStorage.getItem('checked-tags');
+    if (checkedTagsString) {
+        const checkedTags = checkedTagsString.split(',');
+        // 根据标签选中对应的元素
+        checkedTags.forEach(tag => {
+            $(`.tag-checkbox[value="${tag.trim()}"]`).prop('checked', true);
+        });
+        visibleCheckedResults(checkedTags);
+    }
+}
+
+/**
+ * 切换黑暗模式
+ */
+export function switchDarkMode() {
+    // 检查localStorage中的模式设置
+    const darkMode = localStorage.getItem('darkMode');
+    if (darkMode === 'enabled') {
+        document.body.classList.add('dark-mode');
+        $(".result-area").addClass("dark-mode");
+        $("#contextInput").addClass("dark-mode");
+    }
+
+    // 切换黑暗模式的函数
+    document.getElementById('toggleDarkMode').addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        $(".result-area").toggleClass("dark-mode");
+        $("#contextInput").toggleClass("dark-mode");
+        if (document.body.classList.contains('dark-mode')) {
+            localStorage.setItem('darkMode', 'enabled');
+        } else {
+            localStorage.setItem('darkMode', 'disabled');
+        }
+    });
+}
+
+/**
+ * 渲染【猜你想查】按钮
+ * @param  {string|Array} wantSearchWords
+ */
+export function createWantSearchButtons(wantSearchWords) {
+    // 移除上次添加的按钮
+    $("button.want-search").remove();
+    // 渲染用户可能想查的单词的按钮
+    if (typeof wantSearchWords === 'string') {
+        // 如果传入的是一个字符串，那么直接渲染按钮
+        createWantSearchButton(wantSearchWords)
+    }
+    if (Array.isArray(wantSearchWords) && wantSearchWords.length > 0) {
+        wantSearchWords.forEach(word => {
+            createWantSearchButton(word);
+        });
+    }
+    // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
+}
+
+export function autoSwitchOfflineMode() {
+    const offlineElement = document.getElementById('offline');
+
+    // 刷新页面时检查网络状态
+    function checkInitialStatus() {
+        if (!navigator.onLine) {
+            showIndicator();
+        }
+    }
+
+    // 提示未连接网络
+    function showIndicator() {
+        offlineElement.innerHTML = '当前未连接网络';
+        offlineElement.className = 'showOfflineNotification';
+    }
+
+    // 隐藏提示
+    function hideIndicator() {
+        offlineElement.className = 'hideOfflineNotification';
+    }
+
+    // 网络状态切换时更新提示
+    window.addEventListener('online', hideIndicator);
+    window.addEventListener('offline', showIndicator);
+    // 刷新页面时检查网络状态
+    window.addEventListener('load', checkInitialStatus);
+}
+
+/**
+ * 在语境框内双击时搜索单词
+ */
+export function doubleClickSearch() {
+    // TODO 参数是自定义的按钮代码，注意使用枚举的类型
+    const doubleClickKeyName = "Shift"
+    const $textarea = $('#contextInput');
+    let pressCount = 0;
+    let pressTimeout;
+    $($textarea).on('keydown', function (event) {
+            // TODO 允许自定义按键，区分左右按键
+            if (event.key === doubleClickKeyName) {
+                pressCount++;
+                // 如果已经计数到 2，进行单词查找
+                if (pressCount === 2) {
+                    // 判断是否选中了文本
+                    let wantSearchText = window.getSelection().toString()
+                    if (wantSearchText === "") {
+                        // 如果没有选中文本，那么直接根据空格判断单词边界
+                        wantSearchText = getCursorEnglishWord($textarea);
+                    }
+                    // TODO 分析选中的文本
+                    // 构建搜索按钮
+                    createWantSearchButtons(wantSearchText);
+                    // 重置计数器
+                    pressCount = 0;
+                }
+            }
+            // 防止双击过快
+            clearTimeout(pressTimeout);
+            pressTimeout = setTimeout(() => {
+                pressCount = 0; // 超时后重置计数
+            }, 300);
+        }
+    );
+    $($textarea).on('keyup', function (event) {
+        if (event.key !== doubleClickKeyName) {
+            //释放键时重置计数
+            pressCount = 0;
+        }
+    });
+}
+
+
+/**
+ *
+ * @param allTags{Set}
+ */
+export function initCreateTags(allTags) {
+    createTagCheckboxes(allTags)
+    // 加载选中状态
+    loadCheckedTags();
+    // 监听复选框变化
+    $('.tag-checkbox').on('change', function () {
+        filterResults();
+    });
 }

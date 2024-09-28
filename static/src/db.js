@@ -1,7 +1,7 @@
 // 数据库相关操作
 
 import localforage from "localforage";
-import {createResultLink, initCreateLink, updateStatusIcon} from "static/src/dom";
+import {createResultLink, initCreateLink, initCreateTags, updateStatusIcon} from "static/src/dom";
 
 /**
  *  获取初默认的链接 JSON 配置文件
@@ -53,11 +53,7 @@ async function initializeData() {
 export async function initializeDb() {
     try {
         await initializeData();
-        await localforage.iterate((value, key) => {
-            if (value !== undefined && /^\d+$/.test(key)) {
-                initCreateLink(value, key);
-            }
-        });
+        processTagsAndLinks();
     } catch (error) {
         console.error('init db error:', error);
     }
@@ -132,4 +128,105 @@ export async function checkResultInBackend(word) {
     }).catch((error) => {
         console.error('错误 :', error);
     });
+}
+
+/**
+ * 显示 URL 的所有可编辑的信息
+ * @param index{string} 需要修改的元素的 DOM id，也是数据库中的索引。
+ */
+export function showUrlAllInfo(index) {
+    localforage.getItem(`${index}`).then(function (data) {
+        // 填充模态弹窗内容
+        document.getElementById('index_id').value = index;
+        document.getElementById('title').value = data.title || '';
+        document.getElementById('base_url').value = data.base_url || '';
+        document.getElementById('search_url').value = data.search_url || '';
+        document.getElementById('check_method').value = data.check_method || 'get';
+        document.getElementById('not_found_text').value = data.not_found_text || '';
+        document.getElementById('need_check').checked = data.need_check || false;
+        document.getElementById('auto_open').checked = data.auto_open || false;
+        document.getElementById('tags').value = data.tags || '';
+        document.getElementById('show_in_start').checked = data.show_in_start || false;
+        document.getElementById('no_result_not_show').checked = data.no_result_not_show || false;
+        // 显示模态弹窗
+        const modal = new bootstrap.Modal(document.getElementById('dataModal'));
+        modal.show();
+    }).catch(function (err) {
+        console.error('查询数据时出错:', err);
+    });
+}
+
+
+/**
+ * 将修改后的数据保存到数据库，同时重新渲染画面。
+ * @param index{String} 保存时使用的索引，纯数字
+ * @param updatedData{object} URL 的所有配置数据
+ */
+export function updateData2Db(index, updatedData) {
+    localforage.setItem(index, updatedData).then(function () {
+        console.log('数据已更新');
+        // 关闭模态弹窗
+        const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal'));
+        modal.hide();
+    }).then(function () {
+        // 重新渲染修改后的链接
+        processTagsAndLinks();
+    }).catch(function (err) {
+        console.error('保存数据时出错:', err);
+    });
+}
+
+/**
+ * 基于数据库中的数据，渲染标签复选框和搜索结果
+ */
+export function processTagsAndLinks() {
+    // 清空原来渲染结果
+    $('#resultsList').empty();
+    $('#table-url-links-container').empty();
+
+    // 读取数据库
+    let allTags = new Set();
+    localforage.iterate((value, key) => {
+        // 链接以【1:{}】类似的形式存储
+        if (value !== undefined && /^\d+$/.test(key)) {
+            // 基于读取的数据渲染链接
+            initCreateLink(value, key);
+            // 读取链接中包含的标签信息
+            const tags = value["tags"] ? value["tags"].split(',').map(tag => tag.trim()) : [];
+            // 仅在标签不存在时添加
+            tags.forEach(tag => {
+                if (!allTags.has(tag)) {
+                    allTags.add(tag);
+                }
+            });
+        }
+    }).then(() => {
+            // 基于读取的数据渲染标签
+            initCreateTags(allTags);
+        }
+    ).catch(function (err) {
+        console.error("读取数据时出错", err);
+    });
+}
+
+/**
+ * 从数据库读取搜索链接数据，同时渲染到屏幕上。
+ * 如果是第一次访问，那么读取后渲染到画面上
+ */
+export function checkDb() {
+    localforage.config({
+        driver: localforage.INDEXEDDB, name: 'easySearch', version: 1.0, storeName: 'userData', description: '用户数据存储'
+    })
+    localforage.getItem("init-visit").then(function (initVisitFlag) {
+        // 通过 initVisitFlag 是否为 null 或 undefined 判断是否第一次访问网站
+        if (initVisitFlag === null) {
+            localforage.setItem("init-visit", true).then(function () {
+                initializeDb().then(
+                    // TODO 用户第一次访问且渲染成功，考虑进行相关引导
+                )
+            });
+        } else {
+            processTagsAndLinks();
+        }
+    })
 }
