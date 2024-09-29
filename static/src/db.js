@@ -263,7 +263,7 @@ async function getUsedIndexes() {
  * @returns {number}
  */
 async function getNextAvailableIndex(usedIndexes) {
-    let currentIndex = 0;
+    let currentIndex = -1;
     while (usedIndexes.has(currentIndex + 1)) {
         currentIndex++;
     }
