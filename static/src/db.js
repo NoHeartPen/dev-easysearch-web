@@ -163,6 +163,24 @@ export function updateData2Db(index, updatedData) {
 }
 
 /**
+ * 删除指定索引的数据，同时重新渲染画面。
+ * @param index{String} 保存时使用的索引，纯数字
+ */
+export function deleteDataFromDb(index) {
+    localforage.removeItem(index).then(function () {
+        console.log('数据已更新');
+        // 关闭模态弹窗
+        const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal'));
+        modal.hide();
+    }).then(function () {
+        // 重新渲染修改后的链接
+        processTagsAndLinks();
+    }).catch(function (err) {
+        console.error('保存数据时出错:', err);
+    });
+}
+
+/**
  * 基于数据库中的数据，渲染标签复选框和搜索结果
  */
 export function processTagsAndLinks() {

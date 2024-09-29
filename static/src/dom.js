@@ -1,6 +1,13 @@
 // DOM相关操作
 
-import {checkResultInBackend, creatResultLinks, loadCheckedTags, showUrlAllInfo, updateData2Db} from "static/src/db";
+import {
+    checkResultInBackend,
+    creatResultLinks,
+    deleteDataFromDb,
+    loadCheckedTags,
+    showUrlAllInfo,
+    updateData2Db
+} from "static/src/db";
 import {doFullAnalyze, doWordAnalyze} from "static/src/apifetch";
 
 /**
@@ -321,6 +328,12 @@ $('#saveChanges').on('click', function () {
     };
     updateData2Db(index, updatedData);
 });
+
+$("#deleteLink").on("click", function () {
+    const rowId = $('#index_id').val();
+    const index = rowId.match(/\d+/)[0];
+    deleteDataFromDb(index);
+})
 
 /**
  * 渲染所有标签。
