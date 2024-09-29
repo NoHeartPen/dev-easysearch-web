@@ -606,7 +606,8 @@ export function initializeEvents() {
     // 监听模态框关闭事件
     $('#dataModal').on('hidden.bs.modal', function () {
         // 重置「高级设置」的折叠状态
-        $('#collapseOne').collapse('hide'); // 隐藏折叠部分
+        $('#collapseOne').collapse('hide');
+        clearModalData();
     });
 
     // 监听粘贴按钮
@@ -677,5 +678,26 @@ async function analyzeRequest(inputText, analyzeType) {
     } catch (error) {
         console.error('请求失败：', error);
     }
+}
+
+/**
+ * 封装清空模态框数据的函数
+ */
+function clearModalData() {
+    // 清空模态框内的输入数据
+    $('#title').val(''); // 清空标题输入框
+    $('#base_url').val(''); // 清空基础URL输入框
+    $('#search_url').val(''); // 清空搜索URL输入框
+    $('#tags').val(''); // 清空标签输入框
+
+    // 重置复选框状态
+    $('#auto_open').prop('checked', false); // 取消总是自动打开网页复选框
+    $('#show_in_start').prop('checked', false); // 取消总是显示在查词界面复选框
+    $('#need_check').prop('checked', false); // 取消打开前检查复选框
+    $('#no_result_not_show').prop('checked', false); // 取消未找到结果时在查词界面不显示复选框
+
+    // 清空下拉选择框
+    $('#check_method').val('get'); // 重置检查方法下拉框为默认值
+    $('#not_found_text').val(''); // 清空未找到文本输入框
 }
 
