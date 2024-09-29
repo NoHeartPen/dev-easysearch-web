@@ -299,3 +299,69 @@ $('#addUrlLink').on('click', async function () {
         console.error('处理点击事件时出错:', err);
     }
 });
+
+/**
+ * 导出数据到 JSON 文件
+ * @param transformedData
+ */
+function downloadJsonFile(transformedData) {
+    const jsonData = JSON.stringify(transformedData, null, 2); // 格式化为 JSON
+
+    // 创建一个 Blob 对象
+    const blob = new Blob([jsonData], {type: 'application/json'});
+
+    // 创建一个可下载的链接
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    // 获取当前日期和时间
+    const now = new Date();
+    // 提取年、月、日、小时、分钟和秒
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    // 格式化为 YYYY-MM-DD_HH-MM-SS
+    const formattedDate = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
+
+    // 设置下载文件名
+    a.download = `east_search_links_data_${formattedDate}.json`;
+    document.body.appendChild(a);
+    // 触发下载
+    a.click();
+    document.body.removeChild(a); // 移除链接
+
+    // 释放 URL 对象
+    URL.revokeObjectURL(url);
+}
+
+$("#exportLinks").on('click', function () {
+
+    // 创建一个数组来存储所有条目
+    const transformedData = [];
+
+    // 从 localforage 中读取所有数据并导出为 JSON
+    localforage.iterate(function (value) {
+        // 将每个条目添加到 transformedData 数组中
+        transformedData.push({
+            base_url: value.base_url || '',
+            title: value.title || '',
+            search_url: value.search_url || '',
+            check_method: value.check_method || '',
+            not_found_text: value.not_found_text || '',
+            need_check: value.need_check || false, // 默认值
+            auto_open: value.auto_open || true, // 默认值
+            status: '', // 默认值
+            tags: value.tags || '', // 默认值
+            show_in_start: value.show_in_start || true, // 默认值
+            no_result_not_show: value.no_result_not_show || true // 默认值
+        });
+    }).then(function () {
+        // 转换为 JSON 格式，并下载
+        downloadJsonFile(transformedData);
+    }).catch(function (err) {
+        console.error(err);
+    });
+})
