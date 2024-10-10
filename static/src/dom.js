@@ -6,28 +6,10 @@ import {
     deleteDataFromDb,
     loadCheckedTags,
     showUrlAllInfo,
-    updateData2Db
-} from "static/src/db";
-import {doFullAnalyze, doWordAnalyze} from "static/src/apifetch";
-
-/**
- * 获取光标处附近的英文单词
- * @param $textarea
- */
-export function getCursorEnglishWord($textarea) {
-    // TODO 调用后台获取更准确的【猜你想查】
-    const textareaText = $textarea.val();
-    const position = $textarea.prop('selectionStart');
-    let start = position, end = position;
-    // 向前和向后扫描，直到找到单词的边界
-    while (start > 0 && /\S/.test(textareaText[start - 1])) {
-        start--;
-    }
-    while (end < textareaText.length && /\S/.test(textareaText[end])) {
-        end++;
-    }
-    return textareaText.substring(start, end);
-}
+    updateData2Db,
+} from 'static/src/db';
+import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
+import {getCursorEnglishWord} from 'static/src/tools';
 
 /**
  * 获取光标前方的单词
@@ -470,37 +452,40 @@ function autoSwitchOfflineMode() {
  */
 function doubleClickSearch() {
     // TODO 参数是自定义的按钮代码，注意使用枚举的类型
-    const doubleClickKeyName = "Shift"
-    const $textarea = $('#contextInput');
+    const doubleClickKeyName = "Shift";
+    const $textarea = $("#contextInput");
     let pressCount = 0;
     let pressTimeout;
-    $($textarea).on('keydown', function (event) {
-            // TODO 允许自定义按键，区分左右按键
-            if (event.key === doubleClickKeyName) {
-                pressCount++;
-                // 如果已经计数到 2，进行单词查找
-                if (pressCount === 2) {
-                    // 判断是否选中了文本
-                    let wantSearchText = window.getSelection().toString()
-                    if (wantSearchText === "") {
-                        // 如果没有选中文本，那么直接根据空格判断单词边界
-                        wantSearchText = getCursorEnglishWord($textarea);
-                    }
-                    // TODO 分析选中的文本
-                    // 构建搜索按钮
-                    createWantSearchButtons(wantSearchText);
-                    // 重置计数器
-                    pressCount = 0;
+    $($textarea).on("keydown", function (event) {
+        // TODO 允许自定义按键，区分左右按键
+        if (event.key === doubleClickKeyName) {
+            pressCount++;
+            // 如果已经计数到 2，进行单词查找
+            if (pressCount === 2) {
+                // 判断是否选中了文本
+                let wantSearchText = window.getSelection().toString();
+                // 保推断
+                let wantSearchArray = [];
+                if (wantSearchText === "") {
+                    // 如果没有选中文本，那么直接根据空格判断单词边界
+                    const text = $textarea.val();
+                    const position = $textarea.prop("selectionStart");
+                    wantSearchArray = getCursorEnglishWord(text, position);
+                } else {
+                    wantSearchArray[0] = wantSearchText;
                 }
+                createWantSearchButtons(wantSearchArray);
+                // 重置计数器
+                pressCount = 0;
             }
-            // 防止双击过快
-            clearTimeout(pressTimeout);
-            pressTimeout = setTimeout(() => {
-                pressCount = 0; // 超时后重置计数
-            }, 300);
         }
-    );
-    $($textarea).on('keyup', function (event) {
+        // 防止双击过快
+        clearTimeout(pressTimeout);
+        pressTimeout = setTimeout(() => {
+            pressCount = 0; // 超时后重置计数
+        }, 300);
+    });
+    $($textarea).on("keyup", function (event) {
         if (event.key !== doubleClickKeyName) {
             //释放键时重置计数
             pressCount = 0;
