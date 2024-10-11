@@ -6,13 +6,17 @@
  * @returns {Promise<Response>}
  */
 export async function doWordAnalyze(inputText) {
-    return await fetch('/word-analyze', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({text: inputText})
-    });
+  const response = await fetch('/word-analyze', {
+    method: 'POST', headers: {
+      'Content-Type': 'application/json',
+    }, body: JSON.stringify({text: inputText}),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to doWordAnalyze: ' + response.statusText);
+  }
+
+  return response;
 }
 
 /**
@@ -21,26 +25,33 @@ export async function doWordAnalyze(inputText) {
  * @returns {Promise<Response>}
  */
 export async function doFullAnalyze(inputText) {
-    return await fetch('/full-analyze', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({text: inputText})
-    });
+  const response = await fetch('/full-analyze', {
+    method: 'POST', headers: {
+      'Content-Type': 'application/json',
+    }, body: JSON.stringify({text: inputText}),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to doFullAnalyze: ' + response.statusText);
+  }
+
+  return response;
 }
 
 /**
  * 向后台提交所有需要检查搜索结果的网站链接。
- * @param needCheckLinks{Array} 需要检查的网站链接数组。
+ * @param needCheckLinks{Array<String>} 需要检查的网站链接数组。
  */
 export async function doSearch(needCheckLinks) {
-    // 向后台提交所有需要检查搜索结果的网站链接
-    return await fetch('/search', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(needCheckLinks)
-    });
+  const response = await fetch('/search', {
+    method: 'POST', headers: {
+      'Content-Type': 'application/json',
+    }, body: JSON.stringify(needCheckLinks),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to doSearch: ' + response.statusText);
+  }
+  
+  return response;
 }
