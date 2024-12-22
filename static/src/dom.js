@@ -9,7 +9,7 @@ import {
     updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
-import {getCursorEnglishWord} from 'static/src/tools';
+import {getCursorEnglishWord, getCursorWord} from 'static/src/tools';
 
 /**
  * 获取光标前方的单词
@@ -42,42 +42,6 @@ $("#getWordBeforeCursor").on('click', function () {
     $input.focus();
 })
 
-function getCursorWord(text, textCursor, cursorPosition, cursorPattern) {
-    if (/^[a-zA-Z]+$/.test(textCursor) && textCursor.includes(" ")) {
-        // 如果是纯英文
-        let start = cursorPosition, end = cursorPosition;
-        while (start > 0 && /\S/.test(text[start - 1])) {
-            start--;
-        }
-        while (end < text.length && /\S/.test(text[end])) {
-            end++;
-        }
-        return text.substring(start, end);
-    } else {
-        // 不全是英文，且没有空格，基于中英文直接分割单词
-        // 注意【test1中文test2测试】如果光标在【测试】，那么返回应该返回test2
-        const CursorWords = textCursor.match(/[a-zA-Z]+/g)
-        if (CursorWords === null) {
-            // 全中文，直接返回
-            if (cursorPattern === 'after') {
-                // 返回光标后的所有文字
-                return text.substring(cursorPosition, text.length);
-            } else {
-                // 返回光标前的所有文字
-                return text.substring(0, cursorPosition);
-            }
-        } else {
-            if (cursorPattern === 'after') {
-                // 查找光标后的第一个单词
-                return CursorWords[0];
-            } else {
-                // 查找光标前的第一个单词，是提取的单词中的最后一个
-                return CursorWords[CursorWords.length - 1];
-            }
-        }
-    }
-}
-
 /**
  * 获取光标后方的单词
  * @param $textarea
@@ -108,9 +72,8 @@ $("#getWordAfterCursor").on('click', function () {
     $input.focus();
 })
 
-
-/*
-将语境框内的光标向前移动一个单词
+/**
+ * 将语境框内的光标向前移动一个单词
  */
 $('#moveCursorAfter').on('click', function () {
     // 获取文本区域的内容
@@ -227,8 +190,8 @@ export function createResultLink(value, key, word, $searchList) {
 
 /**
  * 将数据库传来的数据渲染为画面上的元素
- * @param link 数据存储的链接对象，包含了链接的所有数据
- * @param linkKey 链接的索引
+ * @param link{object} 数据存储的链接对象，包含了链接的所有数据
+ * @param linkKey{string} 链接的索引
  */
 export function initCreateLink(link, linkKey) {
     // 查词页面显示的数据
@@ -335,7 +298,7 @@ function createTagCheckboxes(allTags) {
     });
 }
 
-/*
+/**
  * 监听标签复选框变化，并过滤搜索结果
  */
 function filterResults() {
@@ -349,7 +312,7 @@ function filterResults() {
     visibleCheckedResults(checkedTags)
 }
 
-/*
+/**
  * 渲染含有相关标签的元素
  * @param {Array} checkedTags 选中的标签
  */
@@ -419,6 +382,9 @@ function createWantSearchButtons(wantSearchWords) {
     // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
 }
 
+/**
+ * 检查是否连接网络，如未连接则切换为离线模式。
+ */
 function autoSwitchOfflineMode() {
     const $offlineElement = $('#offline');
 
@@ -431,6 +397,7 @@ function autoSwitchOfflineMode() {
 
     // 提示未连接网络
     function showIndicator() {
+        // TODO 同时将搜索区域内的元素也修改为离线模式
         $offlineElement.html('当前未连接网络').addClass('showOfflineNotification');
     }
 
@@ -439,6 +406,7 @@ function autoSwitchOfflineMode() {
         $offlineElement.removeClass('showOfflineNotification').addClass('hideOfflineNotification');
     }
 
+    // FIXME 下面的DOM操作统一放到其他地方
     // 网络状态切换时更新提示
     $(window).on('online', hideIndicator);
     $(window).on('offline', showIndicator);
@@ -496,7 +464,7 @@ function doubleClickSearch() {
 
 /**
  *　基于IDB的数据初始化标签
- * @param allTags{Set}
+ * @param allTags{Set} 所有标签。
  */
 export function initCreateTags(allTags) {
     createTagCheckboxes(allTags)
@@ -679,7 +647,7 @@ async function analyzeRequest(inputText, analyzeType) {
 }
 
 /**
- * 封装清空模态框数据的函数
+ * 封装清空模态框内输入的数据
  */
 function clearModalData() {
     // 清空模态框内的输入数据
