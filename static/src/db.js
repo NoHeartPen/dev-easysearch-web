@@ -327,7 +327,7 @@ function downloadJsonFile(transformedData) {
     const formattedDate = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 
     // 设置下载文件名
-    a.download = `east_search_links_data_${formattedDate}.json`;
+    a.download = `easy_search_links_data_${formattedDate}.json`;
     document.body.appendChild(a);
     // 触发下载
     a.click();
