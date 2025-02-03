@@ -325,32 +325,6 @@ export function visibleCheckedResults(checkedTags) {
 }
 
 /**
- * 切换黑暗模式
- */
-function switchDarkMode() {
-    // 检查localStorage中的模式设置
-    const darkMode = localStorage.getItem('darkMode');
-    if (darkMode === 'enabled') {
-        $('body').addClass('dark-mode');
-        $(".result-area").addClass("dark-mode");
-        $("#contextInput").addClass("dark-mode");
-    }
-
-    // 切换黑暗模式的函数
-    $('#toggleDarkMode').on('click', () => {
-        const $body = $('body');
-        $body.toggleClass('dark-mode');
-        $(".result-area").toggleClass("dark-mode");
-        $("#contextInput").toggleClass("dark-mode");
-        if ($body.hasClass('dark-mode')) {
-            localStorage.setItem('darkMode', 'enabled');
-        } else {
-            localStorage.setItem('darkMode', 'disabled');
-        }
-    });
-}
-
-/**
  * 创建「猜你想查」按钮
  * @param {string} word
  */
