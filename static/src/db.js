@@ -1,8 +1,13 @@
 // 数据库相关操作
 
-import localforage from "localforage";
-import {createResultLink, initCreateLink, initCreateTags, visibleCheckedResults} from "static/src/dom";
-import {doSearch} from "static/src/apifetch";
+import localforage from 'localforage';
+import {
+    createResultLink,
+    initCreateLink,
+    initCreateTags,
+    visibleCheckedResults,
+} from 'static/src/dom';
+import {doSearch} from 'static/src/apifetch';
 
 /**
  *  获取初默认的链接 JSON 配置文件
