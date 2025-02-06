@@ -517,7 +517,6 @@ function monitorCursorPositionAndAnalyze() {
 }
 
 export function initializeEvents() {
-    switchDarkMode();
     autoSwitchOfflineMode();
     // 打开设置弹窗
     $('#settingsButton').on('click', () => {
