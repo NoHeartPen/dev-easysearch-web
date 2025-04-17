@@ -265,25 +265,25 @@ export function loadCheckedTags() {
  */
 async function getUsedIndexes() {
     try {
-        const keys = await localforage.keys(); // 使用 await 获取所有键
+        const keys = await localforage.keys();
         const usedIndexes = new Set();
         keys.forEach(function (key) {
-            // 将字符串键转换为数字并添加到集合中
             usedIndexes.add(parseInt(key, 10));
         });
         console.log('已使用的索引:', Array.from(usedIndexes));
         // 获取下一个可用的索引
-        return getNextAvailableIndex(usedIndexes); // 确保返回 Promise
+        // TODO need refactor
+        return getNextAvailableIndex(usedIndexes);
     } catch (err) {
         console.error('获取索引时出错:', err);
-        throw err; // 抛出错误以便在调用处处理
+        throw err;
     }
 }
 
 /**
- * 获取下一个可用的索引
+ * 获取下一个可用索引
  * @param usedIndexes {Set<number>} 已使用的索引
- * @returns {number}
+ * @returns {number} 下一个可用索引
  */
 async function getNextAvailableIndex(usedIndexes) {
     let currentIndex = -1;
@@ -293,11 +293,11 @@ async function getNextAvailableIndex(usedIndexes) {
     return currentIndex + 1;
 }
 
+// TODO should put it in DOM.js
 $('#addUrlLink').on('click', async function () {
     try {
-        const nextAvailableIndex = await getUsedIndexes(); // 使用 await 获取下一个可用的索引
+        const nextAvailableIndex = await getUsedIndexes();
         $('#index_id').val(nextAvailableIndex);
-        // 显示模态弹窗
         const modal = new bootstrap.Modal($('#dataModal')[0]);
         modal.show();
     } catch (err) {
