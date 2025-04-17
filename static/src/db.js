@@ -310,35 +310,26 @@ $('#addUrlLink').on('click', async function () {
  * @param transformedData
  */
 function downloadJsonFile(transformedData) {
-    const jsonData = JSON.stringify(transformedData, null, 2); // 格式化为 JSON
-
-    // 创建一个 Blob 对象
-    const blob = new Blob([jsonData], {type: 'application/json'});
-
-    // 创建一个可下载的链接
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    // 获取当前日期和时间
+    // 获取当前日期和时间作为下载文件名
     const now = new Date();
-    // 提取年、月、日、小时、分钟和秒
     const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0'); // 月份从0开始
+    const month = String(now.getMonth() + 1).padStart(2, '0');
     const day = String(now.getDate()).padStart(2, '0');
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const seconds = String(now.getSeconds()).padStart(2, '0');
-    // 格式化为 YYYY-MM-DD_HH-MM-SS
     const formattedDate = `${year}-${month}-${day}_${hours}-${minutes}-${seconds}`;
 
-    // 设置下载文件名
+    // 导出数据
+    const jsonData = JSON.stringify(transformedData, null, 2);
+    const blob = new Blob([jsonData], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
     a.download = `easy_search_links_data_${formattedDate}.json`;
     document.body.appendChild(a);
-    // 触发下载
     a.click();
-    document.body.removeChild(a); // 移除链接
-
-    // 释放 URL 对象
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
 }
 
