@@ -31,18 +31,6 @@ export function getBeforeCursorWord($textarea, cursorPosition) {
 }
 
 /**
- * 按下↤时查询光标前方的单词
- */
-$("#getWordBeforeCursor").on('click', function () {
-    const $input = $('#contextInput');
-    const cursorPosition = $input.prop('selectionStart');
-    const word = getBeforeCursorWord($input, cursorPosition);
-    $('#wordInput').val(word);
-    $('#searchButton').click();
-    $input.focus();
-})
-
-/**
  * 获取光标后方的单词
  * @param $textarea
  * @returns {string}
@@ -59,116 +47,6 @@ export function getAfterCursorWord($textarea) {
         return getCursorWord(textareaText, textAfterCursor, cursorPosition, 'after')
     }
 }
-
-/**
- * 按下↦时查询光标后方的单词
- */
-$("#getWordAfterCursor").on('click', function () {
-    const $input = $('#contextInput');
-    const word = getAfterCursorWord($input)
-    $('#wordInput').val(word);
-    $('#searchButton').click();
-    // 即使没有聚焦到文本区域，也直接进入文本区域，减少用户操作次数
-    $input.focus();
-})
-
-/**
- * 将语境框内的光标向前移动一个单词
- */
-$('#moveCursorAfter').on('click', function () {
-    // 获取文本区域的内容
-    const $input = $('#contextInput');
-    // 即使没有聚焦到文本区域，也直接进入文本区域，减少用户操作次数
-    $input.focus();
-    const text = $input.val();
-    // 获取当前光标位置
-    const cursorPosition = $input.prop('selectionStart');
-    // 使用 Segmenter 分割文本
-    // https://www.iana.org/assignments/language-subtag-registry/language-subtag-registry
-    // 中文 zh 英语 en
-    let langTag = 'en-US'; //
-    if (/[\u3040-\u30FF]/.test(text)) {
-        console.log("日语")
-        langTag = 'ja-JP';
-    }
-    const segmenter = new Intl.Segmenter(langTag, {granularity: 'word'});
-    //const segments = Array.from(segmenter.segment(text));
-    const segments = [...segmenter.segment(text)];
-
-    console.log(segments);
-
-    let wordIndex = 0
-    let charCount = 0;
-
-    for (const segment of segments) {
-        // 通过遍历分词结果判断当前光标所在分词结果
-        const segmentLength = segment.segment.length;
-        if (charCount + segmentLength > cursorPosition) {
-            console.log(` charCount${charCount} cursorPosition${cursorPosition}segmentLength ${segmentLength}`)
-            break;
-        }
-        charCount += segmentLength;
-        wordIndex++;
-    }
-    // 基于当前光标在的分词结果的索引计算出下一个单词的索引
-    const nextWordIndex = wordIndex + 1;
-    if (nextWordIndex >= segments.length) {
-        // 直接移动光标到最后一个字符处
-        console.log("直接移动光标到最后一个字符处")
-        $input[0].setSelectionRange(text.length, text.length);
-    } else {
-        // 移动光标到下一个单词的开头
-        const nextWord = segments[nextWordIndex].segment;
-        const nextWordStart = text.lastIndexOf(nextWord);
-        $input[0].setSelectionRange(nextWordStart, nextWordStart);
-    }
-    $input.focus();
-});
-
-/**
- * 将语境框内的光标向前移动一个单词
- */
-$('#moveCursorBefore').on('click', function () {
-    const $input = $('#contextInput');
-    $input.focus();
-    const cursorPosition = $input.prop('selectionStart'); // 获取当前光标位置
-    const text = $input.val(); // 获取文本的完整内容
-
-    // 主流桌面端和移动端设备已经都已兼容该 API
-    // TODO 注意在 Kindle 这样的设备上可能不支持
-    const segmenter = new Intl.Segmenter('ja-JP', {granularity: 'word'});
-    const segments = [...segmenter.segment(text)];
-
-
-    let wordIndex = 0;
-    let charCount = 0;
-
-    // 处理光标在文本开头的情况
-    if (cursorPosition === 0) {
-        return;
-    }
-
-    // 计算当前光标前的单词数量
-    for (const segment of segments) {
-        const segmentLength = segment.segment.length;
-        if (charCount + segmentLength > cursorPosition) {
-            break; // 到达光标位置
-        }
-        charCount += segmentLength;
-        wordIndex++;
-    }
-
-    // 计算光标前一个单词的起始位置
-    if (wordIndex > 0) {
-        const previousWord = segments[wordIndex - 1].segment;
-        const previousWordStart = text.lastIndexOf(previousWord, charCount - previousWord.length);
-        $input[0].setSelectionRange(previousWordStart, previousWordStart); // 设置光标位置
-    }
-
-    // 确保文本框获得焦点
-    $input.focus();
-});
-
 
 /**
  * 基于用户的输入重新渲染链接，渲染后的链接直接指向搜索地址
