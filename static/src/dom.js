@@ -280,11 +280,11 @@ function doubleClickSearch() {
         // TODO 允许自定义按键，区分左右按键
         if (event.key === doubleClickKeyName) {
             pressCount++;
-            // 如果已经计数到 2，进行单词查找
+            // 如果已经计数到 2，查找单词
             if (pressCount === 2) {
                 // 判断是否选中了文本
                 let wantSearchText = window.getSelection().toString();
-                // 保推断
+                // 保存推断
                 let wantSearchArray = [];
                 if (wantSearchText === "") {
                     // 如果没有选中文本，那么直接根据空格判断单词边界
@@ -302,7 +302,8 @@ function doubleClickSearch() {
         // 防止双击过快
         clearTimeout(pressTimeout);
         pressTimeout = setTimeout(() => {
-            pressCount = 0; // 超时后重置计数
+            // 超时后重置计数
+            pressCount = 0;
         }, 300);
     });
     $($textarea).on("keyup", function (event) {
