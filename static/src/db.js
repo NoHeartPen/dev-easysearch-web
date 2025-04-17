@@ -333,29 +333,27 @@ function downloadJsonFile(transformedData) {
     URL.revokeObjectURL(url);
 }
 
+/**
+ * 读取所有数据并导出为 JSON 格式
+ */
 $("#exportLinks").on('click', function () {
-
-    // 创建一个数组来存储所有条目
     const transformedData = [];
-
-    // 从 localforage 中读取所有数据并导出为 JSON
     localforage.iterate(function (value) {
-        // 将每个条目添加到 transformedData 数组中
         transformedData.push({
             base_url: value.base_url || '',
             title: value.title || '',
             search_url: value.search_url || '',
             check_method: value.check_method || '',
             not_found_text: value.not_found_text || '',
-            need_check: value.need_check || false, // 默认值
-            auto_open: value.auto_open || true, // 默认值
-            status: '', // 默认值
-            tags: value.tags || '', // 默认值
-            show_in_start: value.show_in_start || true, // 默认值
-            no_result_not_show: value.no_result_not_show || true // 默认值
+            // 默认不检查
+            need_check: value.need_check || false,
+            auto_open: value.auto_open || true,
+            status: '',
+            tags: value.tags || '',
+            show_in_start: value.show_in_start || true,
+            no_result_not_show: value.no_result_not_show || true
         });
     }).then(function () {
-        // 转换为 JSON 格式，并下载
         downloadJsonFile(transformedData);
     }).catch(function (err) {
         console.error(err);
