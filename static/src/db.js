@@ -91,9 +91,12 @@ export async function checkResultInBackend(word) {
     // TODO 只向后台提交最少的信息，用构建的URL可能不是最好的选择
     let needCheckLinksMap = {};
     await localforage.iterate((value, key) => {
-        if (/^\d+$/.test(key) && // 默认使用纯数字作为URL链接的索引
-            value["need_check"] !== false && // 不检查网站是否存在相关搜索结果
-            value["check_method"] !== '' // 未定义检查方法
+        if (// 默认使用纯数字作为URL链接的索引
+            /^\d+$/.test(key) &&
+            // 不检查网站是否存在相关搜索结果
+            value["need_check"] !== false &&
+            // 未定义检查方法
+            value["check_method"] !== ''
         ) {
             needCheckLinksMap[key] = {
                 url_index: key,
@@ -122,7 +125,7 @@ export async function checkResultInBackend(word) {
 
 /**
  * 显示 URL 的所有可编辑的信息
- * @param index{string} 需要修改的元素的 DOM id，也是数据库中的索引。
+ * @param index{string} 需要修改的元素的 DOM id，也是数据库的索引
  */
 export function showUrlAllInfo(index) {
     localforage.getItem(`${index}`).then(function (data) {
@@ -156,7 +159,7 @@ export function showUrlAllInfo(index) {
 export function updateData2Db(index, updatedData) {
     localforage.setItem(index, updatedData).then(function () {
         console.log('数据已更新');
-        // 关闭模态弹窗
+        // TODO need refactor 180 关闭模态弹窗
         const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal'));
         modal.hide();
     }).then(function () {
@@ -174,7 +177,7 @@ export function updateData2Db(index, updatedData) {
 export function deleteDataFromDb(index) {
     localforage.removeItem(index).then(function () {
         console.log('数据已更新');
-        // 关闭模态弹窗
+        // TODO need refactor 162 关闭模态弹窗
         const modal = bootstrap.Modal.getInstance(document.getElementById('dataModal'));
         modal.hide();
     }).then(function () {
@@ -219,8 +222,8 @@ export function processTagsAndLinks() {
 }
 
 /**
- * 从数据库读取搜索链接数据，同时渲染到屏幕上。
- * 如果是第一次访问，那么读取后渲染到画面上
+ * 从数据库读取搜索链接数据，同时渲染到屏幕上
+ * 如果是第一次访问，那么读取后再渲染
  */
 export function checkDb() {
     localforage.config({
@@ -231,7 +234,7 @@ export function checkDb() {
         description: '用户数据存储'
     })
     localforage.getItem("init-visit").then(function (initVisitFlag) {
-        // 通过 initVisitFlag 是否为 null 或 undefined 判断是否第一次访问网站
+        // 通过 initVisitFlag 是否为 null 判断是否第一次访问网站
         if (initVisitFlag === null) {
             localforage.setItem("init-visit", true).then(function () {
                 initializeDb().then(
@@ -244,7 +247,9 @@ export function checkDb() {
         // 保存当前已经使用了的索引
         getUsedIndexes();
     })
-} /*
+}
+
+/*
  * 加载 localStorage 中保存的选中状态
  */
 export function loadCheckedTags() {
