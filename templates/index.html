@@ -245,48 +245,5 @@
         integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy"
         crossorigin="anonymous"></script>
 <script src="/static/dist/bundle.js"></script>
-<script async>
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.getRegistrations().then(registrations => {
-            let isRegistered = false;
-
-            // 检查是否已经注册了同名的 Service Worker
-            registrations.forEach(registration => {
-                if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
-                    isRegistered = true;
-                    console.log('Service Worker already registered:', registration.scope);
-                }
-            });
-
-            // 如果没有注册同名的 Service Worker，则进行注册
-            if (!isRegistered) {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered with scope:', registration.scope);
-                    })
-                    .catch(error => {
-                        console.error('Service Worker registration failed:', error);
-                    });
-            } else {
-                // 如果已注册，选择注销旧的 Service Worker
-                registrations.forEach(registration => {
-                    if (registration.active && registration.active.scriptURL.includes('/sw.js')) {
-                        registration.unregister().then(() => {
-                            console.log('Old Service Worker unregistered:', registration.scope);
-                            // 重新注册新的 Service Worker
-                            navigator.serviceWorker.register('/sw.js')
-                                .then(newRegistration => {
-                                    console.log('New Service Worker registered with scope:', newRegistration.scope);
-                                })
-                                .catch(error => {
-                                    console.error('New Service Worker registration failed:', error);
-                                });
-                        });
-                    }
-                });
-            }
-        });
-    }
-</script>
 </body>
 </html>
