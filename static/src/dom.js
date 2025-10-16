@@ -1,12 +1,12 @@
 // DOM相关操作
 
 import {
-    checkResultInBackend,
-    creatResultLinks,
-    deleteDataFromDb,
-    loadCheckedTags,
-    showUrlAllInfo,
-    updateData2Db,
+  checkResultInBackend,
+  creatResultLinks,
+  deleteDataFromDb,
+  loadCheckedTags,
+  showUrlAllInfo,
+  updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
 import {getCursorEnglishWord, getCursorWord} from 'static/src/tools';
