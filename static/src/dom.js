@@ -208,7 +208,8 @@ export function visibleCheckedResults(checkedTags) {
  */
 function createWantSearchButton(word) {
     $("#want-search-container").append(`
-            <button class="btn btn-primary me-2 btn-sm want-search" value="${word}">
+            <button class="btn btn-outline-primary me-2 mb-1
+btn-sm want-search" value="${word}">
                 ${word}
             </button>
         `);
