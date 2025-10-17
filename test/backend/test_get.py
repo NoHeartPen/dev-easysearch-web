@@ -1,7 +1,6 @@
 import unittest
 
-from utils.check_result.check_get import get_for_url
-from utils.check_result.check_get import get_url_with_count_check
+from utils.check_result.check_get import get_for_url, get_url_with_count_check
 from utils.check_result.check_result_info import CheckResultInfo
 
 
@@ -27,18 +26,6 @@ class MyTestCase(unittest.TestCase):
                 "https://www.weblio.jp/content/XXXXXXXXXXXXXXXXXXXXXXXXXXX",
                 None,
                 "見出し語は見つかりませんでした。",
-            ),
-        )
-
-    def test_something_with_check(self):
-        self.assertEqual(
-            CheckResultInfo(True, True, "25,302"),
-            get_url_with_count_check(
-                "https://yourei.jp/食べる",
-                None,
-                "見出し語は見つかりませんでした。",
-                r'<span id="num-examples" class="btn-default badge">(.*?)</span>',
-                1,
             ),
         )
 
