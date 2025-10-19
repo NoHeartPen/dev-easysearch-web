@@ -20,6 +20,7 @@
     "copy-webpack-plugin": "^13.0.1",
     "vi-fetch": "^0.8.0",
     "vitest": "^3.2.4",
+    "webpack": "^5.102.1",
     "webpack-cli": "^6.0.1"
   }
 }

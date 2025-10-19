@@ -1,1 +1,1 @@
-web: npm install && npm run build && gunicorn app:app
+web: npm install --include=dev && npm run build && gunicorn app:app
