@@ -398,7 +398,10 @@ function monitorCursorPositionAndAnalyze() {
 
 export function initializeEvents() {
     autoSwitchOfflineMode();
-    // 打开设置弹窗
+  // 刷新页面自动将光标放在语境框内
+  $('#contextInput').focus();
+
+  // 打开设置弹窗
     $('#settingsButton').on('click', () => {
         const settingsModal = new bootstrap.Modal($('#settingsModal')[0]);
         settingsModal.show();
