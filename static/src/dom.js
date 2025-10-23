@@ -235,38 +235,6 @@ function createWantSearchButtons(wantSearchWords) {
     // TODO 反馈按钮，用于向收集尚未收录在非辞書中的单词
 }
 
-/**
- * 检查是否连接网络，如未连接则切换为离线模式。
- */
-function autoSwitchOfflineMode() {
-    const $offlineElement = $('#offline');
-
-    // 刷新页面时检查网络状态
-    function checkInitialStatus() {
-        if (!navigator.onLine) {
-            showIndicator();
-        }
-    }
-
-    // 提示未连接网络
-    function showIndicator() {
-        // TODO 同时将搜索区域内的元素也修改为离线模式
-        $offlineElement.html('当前未连接网络').addClass('showOfflineNotification');
-    }
-
-    // 隐藏提示
-    function hideIndicator() {
-        $offlineElement.removeClass('showOfflineNotification').addClass('hideOfflineNotification');
-    }
-
-    // FIXME 下面的DOM操作统一放到其他地方
-    // 网络状态切换时更新提示
-    $(window).on('online', hideIndicator);
-    $(window).on('offline', showIndicator);
-
-    // 刷新页面时检查网络状态
-    $(window).on('load', checkInitialStatus);
-}
 
 /**
  * 在语境框内双击时搜索单词
@@ -397,7 +365,6 @@ function monitorCursorPositionAndAnalyze() {
 }
 
 export function initializeEvents() {
-    autoSwitchOfflineMode();
   // 刷新页面自动将光标放在语境框内
   $('#contextInput').focus();
 
