@@ -2,7 +2,7 @@ import json
 
 import ipadic  # type: ignore
 import MeCab  # type: ignore
-from flask import Flask, jsonify, render_template, request, send_from_directory
+from flask import Flask, jsonify, render_template, request
 
 from utils.check_result.check_get import get_for_url
 from utils.langs.mecab_utls import get_full_jishokei, get_word_jishokei
@@ -13,12 +13,6 @@ app = Flask(__name__)
 @app.route("/")
 def return_index():
     return render_template("index.html")
-
-
-@app.route("/sw.js")
-def return_service_worker():
-    # 由于 ServiceWorker 限制，必须在网站根目录注册才能控制全局
-    return send_from_directory("static/src", "sw.js")
 
 
 @app.route("/search", methods=["POST"])
