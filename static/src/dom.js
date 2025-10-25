@@ -9,44 +9,7 @@ import {
   updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
-import {getCursorEnglishWord, getCursorWord} from 'static/src/tools';
-
-/**
- * 获取光标前方的单词
- * @param $textarea
- * @param cursorPosition
- * @returns {string}
- */
-export function getBeforeCursorWord($textarea, cursorPosition) {
-    const textareaText = $textarea.val();
-    const position = $textarea.prop('selectionStart');
-    const textBeforeCursor = textareaText.substring(0, position)
-    if (/[\u3040-\u30FF]/.test(textBeforeCursor)) {
-        // 含有假名，说明可能是日语
-        // TODO 暂时先返回光标前的所有文本分析 API
-        return textBeforeCursor;
-    } else {
-        return getCursorEnglishWord(textareaText, textBeforeCursor, cursorPosition, 'before')
-    }
-}
-
-/**
- * 获取光标后方的单词
- * @param $textarea
- * @returns {string}
- */
-export function getAfterCursorWord($textarea) {
-    const textareaText = $textarea.val();
-    const cursorPosition = $textarea.prop('selectionStart');
-    const textAfterCursor = textareaText.substring(cursorPosition, textareaText.length);
-    if (/[\u3040-\u30FF]/.test(textAfterCursor)) {
-        // 含有假名，说明可能是日语
-        // TODO 暂时先返回光标前的所有文本
-        return textAfterCursor;
-    } else {
-        return getCursorWord(textareaText, textAfterCursor, cursorPosition, 'after')
-    }
-}
+import {getCursorEnglishWord} from 'static/src/tools';
 
 /**
  * 基于用户的输入重新渲染链接，渲染后的链接直接指向搜索地址
@@ -180,13 +143,10 @@ function createTagCheckboxes(allTags) {
  * 监听标签复选框变化，并过滤搜索结果
  */
 function filterResults() {
-    // 获取标签的选中状态
     const checkedTags = $('.tag-checkbox:checked').map(function () {
         return $(this).val();
     }).get();
-    // 保存选中状态到 localStorage
     localStorage.setItem('checked-tags', checkedTags.join(','));
-    // 根据选中标签过滤搜索结果
     visibleCheckedResults(checkedTags)
 }
 
@@ -216,7 +176,7 @@ btn-sm want-search" value="${word}">
 }
 
 /**
- * 渲染【猜你想查】按钮
+ * 渲染「猜你想查」按钮
  * @param  {string|Array} wantSearchWords
  */
 function createWantSearchButtons(wantSearchWords) {
