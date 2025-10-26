@@ -5,6 +5,7 @@
   "main": ".static/src/index.js",
   "scripts": {
     "test": "vitest",
+    "dev": "webpack --mode development",
     "build": "webpack --mode production"
   },
   "author": "",
