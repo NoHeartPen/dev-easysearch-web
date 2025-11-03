@@ -1,12 +1,12 @@
 // DOM相关操作
 
 import {
-  checkResultInBackend,
-  creatResultLinks,
-  deleteDataFromDb,
-  loadCheckedTags,
-  showUrlAllInfo,
-  updateData2Db,
+    checkResultInBackend,
+    creatResultLinks,
+    deleteDataFromDb,
+    loadCheckedTags,
+    showUrlAllInfo,
+    updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
 import {getCursorEnglishWord} from 'static/src/tools';
@@ -300,14 +300,9 @@ function clickSearchButton() {
           window.open($link.attr('href'), '_blank', 'noopener,noreferrer');
         }, index * 500);
       }
-
-      const needCheck = $link.data('need-check');
-      if (needCheck) {
-        // 如果需要检查，执行检查逻辑
-        checkResultInBackend(word).then(checkResults => {
+    });
+      checkResultInBackend(word).then(checkResults => {
           updateStatusIcons(checkResults);
-        });
-      }
     });
   });
 }
