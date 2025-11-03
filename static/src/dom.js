@@ -1,12 +1,12 @@
 // DOM相关操作
 
 import {
-  checkResultInBackend,
-  creatResultLinks,
-  deleteDataFromDb,
-  loadCheckedTags,
-  showUrlAllInfo,
-  updateData2Db,
+    checkResultInBackend,
+    creatResultLinks,
+    deleteDataFromDb,
+    loadCheckedTags,
+    showUrlAllInfo,
+    updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
 import {getCursorEnglishWord} from 'static/src/tools';
@@ -352,6 +352,223 @@ function monitorCursorPositionAndAnalyze() {
   });
 }
 
+// 显示复制提示的辅助函数
+function showCopyToast(message, type = 'success') {
+    const toastHTML = `
+        <div class="toast show" role="alert" aria-live="assertive" aria-atomic="true" style="position: fixed; top: 20px; right: 20px; z-index: 9999;">
+            <div class="toast-body ${type === 'error' ? 'bg-danger text-white' : 'bg-success text-white'}">
+                ${message}
+            </div>
+        </div>
+    `;
+
+    const $toast = $(toastHTML);
+    $('body').append($toast);
+
+    // 3秒后自动移除
+    setTimeout(() => {
+        $toast.fadeOut(300, function () {
+            $(this).remove();
+        });
+    }, 3000);
+}
+
+// 辅助函数：转义 HTML 特殊字符
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+
+function renderReviewRecords() {
+    const $reviewTableBody = $('#review-table-body'); // 定位到表格体
+    $reviewTableBody.empty(); // 清空旧数据
+
+    // 加载用户搜索记录
+    const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+    if (userSearchLog.length === 0) {
+        $reviewTableBody.append(`
+      <tr>
+         <td colspan="3" class="text-center">暂无记录</td>
+      </tr>
+    `);
+        return;
+    }
+
+    // 遍历记录并生成行
+    userSearchLog.forEach((log, index) => {
+        const word = log.searchWord || ''; // 搜索的单词
+        const context = log.contextInput || ''; // 搜索时语境框的内容
+
+        const tableRow = `
+      <tr>
+        <td>${escapeHtml(word)}</td>
+        <td class="context-cell" data-index="${index}" style="cursor: pointer;">${escapeHtml(context)}</td>
+        <td>
+          <button class="btn btn-info btn-sm copy-record me-2" data-index="${index}" title="复制单词和语境">
+            <i class="bi bi-files"></i>
+          </button>
+          <button class="btn btn-danger btn-sm delete-record" data-index="${index}" title="删除">
+            <i class="bi bi-trash"></i>
+          </button>
+        </td>
+      </tr>
+    `;
+        $reviewTableBody.append(tableRow);
+    });
+}
+
+// 绑定复制按钮的事件监听器
+$('#review-table-body').on('click', '.copy-record', function () {
+    const index = $(this).data('index'); // 获取对应记录的索引
+    const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+
+    if (userSearchLog[index]) {
+        const word = userSearchLog[index].searchWord || '';
+        const context = userSearchLog[index].contextInput || '';
+
+        // 组织要复制的文本
+        const textToCopy = `语境: ${context}\n单词: ${word}`;
+
+        // 复制到剪贴板
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            // 显示成功提示
+            showCopyToast('已复制到剪贴板');
+        }).catch(err => {
+            console.error('复制失败:', err);
+            showCopyToast('复制失败，请重试', 'error');
+        });
+    }
+});
+
+
+// 绑定删除按钮的事件监听器
+$('#review-table-body').on('click', '.delete-record', function () {
+    const index = $(this).data('index'); // 获取对应记录的索引
+
+    // 从 localStorage 中删除对应记录
+    const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+    userSearchLog.splice(index, 1); // 移除索引数据
+    localStorage.setItem('userSearchLog', JSON.stringify(userSearchLog));
+
+    // 重新渲染复习记录
+    renderReviewRecords();
+});
+
+
+$('#review-table-body').on('click', '.context-cell', function () {
+    const $cell = $(this);
+    const index = $cell.data('index');
+    const currentContent = $cell.text();
+
+    // 如果已经在编辑模式，不重复处理
+    if ($cell.find('textarea').length > 0) {
+        return;
+    }
+
+    // 创建编辑框
+    const $textarea = $(`
+        <textarea class="form-control context-edit" data-index="${index}" style="min-height: 60px;">${currentContent}</textarea>
+    `);
+
+    // 替换单元格内容为编辑框
+    $cell.empty().append($textarea);
+    $textarea.focus();
+
+    // 处理保存逻辑
+    const saveContext = () => {
+        const newContent = $textarea.val();
+        const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+
+        if (userSearchLog[index]) {
+            userSearchLog[index].contextInput = newContent;
+            localStorage.setItem('userSearchLog', JSON.stringify(userSearchLog));
+        }
+
+        // 重新渲染表格
+        renderReviewRecords();
+    };
+
+    // 失焦时保存
+    $textarea.on('blur', saveContext);
+
+    // 按下 Ctrl+Enter 或 Cmd+Enter 时保存
+    $textarea.on('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            saveContext();
+        }
+    });
+});
+
+
+// 绑定语境单元格的点击编辑事件
+$('#review-table-body').on('click', '.context-cell', function () {
+    const $cell = $(this);
+    const index = $cell.data('index');
+    const currentContent = $cell.text();
+
+    // 如果已经在编辑模式，不重复处理
+    if ($cell.find('textarea').length > 0) {
+        return;
+    }
+
+    // 创建编辑框
+    const $textarea = $(`
+        <textarea class="form-control context-edit" data-index="${index}" style="min-height: 60px;">${currentContent}</textarea>
+    `);
+
+    // 替换单元格内容为编辑框
+    $cell.empty().append($textarea);
+    $textarea.focus();
+
+    // 处理保存逻辑
+    const saveContext = () => {
+        const newContent = $textarea.val();
+        const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+
+        if (userSearchLog[index]) {
+            userSearchLog[index].contextInput = newContent;
+            localStorage.setItem('userSearchLog', JSON.stringify(userSearchLog));
+        }
+
+        // 重新渲染表格
+        renderReviewRecords();
+    };
+
+    // 失焦时保存
+    $textarea.on('blur', saveContext);
+
+    // 按下 Ctrl+Enter 或 Cmd+Enter 时保存
+    $textarea.on('keydown', function (e) {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            saveContext();
+        }
+    });
+});
+
+
+// 绑定删除按钮的事件监听器
+$('#review-table-body').on('click', '.delete-record', function () {
+    const index = $(this).data('index'); // 获取对应记录的索引
+
+    // 从 localStorage 中删除对应记录
+    const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+    userSearchLog.splice(index, 1); // 移除索引数据
+    localStorage.setItem('userSearchLog', JSON.stringify(userSearchLog));
+
+    // 重新渲染复习记录
+    renderReviewRecords();
+});
+
+
 export function initializeEvents() {
   // 刷新页面自动将光标放在语境框内
   $('#contextInput').focus();
@@ -364,9 +581,39 @@ export function initializeEvents() {
 
   $('#searchButton').on('click', function() {
     clickSearchButton();
+      const searchWord = $('#wordInput').val();
+      const contextInput = $('#contextInput').val();
+      const userSearchLog = JSON.parse(localStorage.getItem('userSearchLog')) || [];
+      userSearchLog.push({
+          timestamp: new Date().toISOString(),
+          searchWord,
+          contextInput,
+      });
+      localStorage.setItem('userSearchLog', JSON.stringify(userSearchLog));
   });
 
-  // 搜索框内按回车触发搜索事件
+    $('#resultsList').on('click', 'a.btn', function (event) {
+        const clickedLink = $(this).text();
+        const searchWord = $('#wordInput').val();
+        const linkUrl = $(this).attr('href');
+
+        // TODO: 将用户点击记录保存到数据库或本地存储
+        const userClickLog = JSON.parse(localStorage.getItem('userClickLog')) || [];
+        userClickLog.push({
+            timestamp: new Date().toISOString(),
+            clickedLink,
+            searchWord,
+            linkUrl,
+        });
+        localStorage.setItem('userClickLog', JSON.stringify(userClickLog));
+    });
+
+    // 监听复习选项卡被点击的事件，切换时加载复习记录
+    $('#review-tab').on('click', function () {
+        renderReviewRecords();
+    });
+
+    // 搜索框内按回车触发搜索事件
   $('#wordInput').keydown(function(e) {
     if (e.key === 'Enter') {
       e.preventDefault();
