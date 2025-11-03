@@ -22,7 +22,7 @@ export function createResultLink(value, key, word, $searchList) {
     if (value !== undefined && /^\d+$/.test(key)) {
         const $listItem = $(`
             <a class="btn btn-outline-success btn-sm" href="${value["search_url"]}${word}" rel="noopener noreferrer"
-               role="button" data-tags="${value["tags"]}"
+               role="button" data-tags="${value['tags']}" data-auto-open="${value['auto_open']}"
                target="_blank" id="url_index_${key}">${value["title"]}<span class="status-icon" id="status_index_${key}">?</span></a>
         `);
         $searchList.append($listItem);
@@ -35,16 +35,26 @@ export function createResultLink(value, key, word, $searchList) {
  * @param linkKey{string} 链接的索引
  */
 export function initCreateLink(link, linkKey) {
-    // 查词页面显示的数据
-    const $listItem = $(`
+  // 查词页面显示的数据
+  const $listItem = $(`
     <a class="btn btn-outline-success btn-sm" href="${link["base_url"]}" rel="noopener noreferrer"
                role="button"
-               target="_blank" id="url_index_${linkKey}" data-tags="${link["tags"]}">${link["title"]}</a>
+               target="_blank" id="url_index_${linkKey}"
+               data-tags="${link['tags']}"
+               data-auto-open="${link['auto_open']}"
+               data-need-check="${link['need_check']}">
+        ${link['title']}
+    </a>
         `);
-    $('#resultsList').append($listItem);
-    // 编辑页面显示的数据
-    const $tableItem = $(`<tr class="table-url-link" id="table_url_index_${linkKey}""><td>${link["title"]}</td><td></td></tr>`)
-    $('#table-url-links-container').append($tableItem);
+  $('#resultsList').append($listItem);
+  // 编辑页面显示的数据
+  const $tableItem = $(`
+    <tr class="table-url-link" id="table_url_index_${linkKey}">
+        <td>${link['title']}</td>
+        <td></td>
+    </tr>
+    `);
+  $('#table-url-links-container').append($tableItem);
 }
 
 /**
@@ -277,12 +287,29 @@ function clickSearchButton() {
     creatResultLinks(word, $resultsList).then(() => {
             // 重新构建链接后只显示含有相关标签的元素
             filterResults();
-            checkResultInBackend(word).then(checkResults => {
-                updateStatusIcons(checkResults)
-            })
-        }
-    )
+      const resultLinks = $resultsList.find('a');
 
+      resultLinks.each(function(index,
+      ) {
+        const $link = $(this);
+        const autoOpen = $link.data('auto-open');
+
+        if (autoOpen) {
+          // 由于浏览器限制，批量打开大量 URL 需要间隔 500 ms
+          setTimeout(() => {
+            window.open($link.attr('href'), '_blank', 'noopener,noreferrer');
+          }, index * 500);
+        }
+
+        const needCheck = $link.data('need-check');
+        if (needCheck) {
+          // 如果需要检查，执行检查逻辑
+          checkResultInBackend(word).then(checkResults => {
+            updateStatusIcons(checkResults);
+          });
+        }
+      });
+    });
 }
 
 /**
