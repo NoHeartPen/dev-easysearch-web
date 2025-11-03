@@ -77,10 +77,10 @@ function updateStatusIcon(url_index, status) {
   let $listItem = $(`#url_index_${url_index}`);
   let $statusIcon = $(`#status_index_${url_index}`);
   if (status === true) {
-    $statusIcon.html('✅');
+      $statusIcon.html(' ✅');
   } else if (status === false) {
     $listItem.removeClass('btn-outline-success').addClass('btn-outline-danger');
-    $statusIcon.html('❌');
+      $statusIcon.html(' ❌');
   } else {
     // 无法判断网页是否含有想要的结果
     $listItem.removeClass('btn-outline-success').
