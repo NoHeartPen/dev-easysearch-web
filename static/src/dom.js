@@ -20,9 +20,10 @@ import {getCursorEnglishWord} from 'static/src/tools';
  */
 export function createResultLink(value, key, word, $searchList) {
   if (value !== undefined && /^\d+$/.test(key)) {
+    const replacedSearchUrl = value['search_url'].replace('{w}', word);
     const $listItem = $(`
-            <a class="btn btn-outline-success btn-sm" href="${value['search_url']}${word}" rel="noopener noreferrer"
-               role="button" data-tags="${value['tags']}" data-auto-open="${value['auto_open']}"
+            <a class="btn btn-outline-success btn-sm" href="${replacedSearchUrl}" rel="noopener noreferrer"
+               role="button" data-tags="${value['tags']}" data-auto-open="${value['auto_open']}" data-need-check="${value['need_check']}"
                target="_blank" id="url_index_${key}">${value['title']}<span class="status-icon" id="status_index_${key}">?</span></a>
         `);
     $searchList.append($listItem);

@@ -100,7 +100,7 @@ export async function checkResultInBackend(word) {
         ) {
             needCheckLinksMap[key] = {
                 url_index: key,
-                search_url: value["search_url"] + word,
+                search_url: value['search_url'].replace('{w}', word),
                 check_method: value["check_method"],
                 not_found_text: value["not_found_text"]
             };
