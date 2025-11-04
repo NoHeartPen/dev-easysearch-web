@@ -502,6 +502,19 @@
     "need_check": false,
     "auto_open": false,
     "status": "",
+    "tags": "#日语,#翻译",
+    "show_in_start": true,
+    "no_result_not_show": true
+  },
+  {
+    "base_url": "https://www.google.com",
+    "title": "Google 方言 とは",
+    "search_url": "https://www.google.com/search?q={w}+方言+とは",
+    "check_method": "get",
+    "not_found_text": "",
+    "need_check": false,
+    "auto_open": false,
+    "status": "",
     "tags": "#日语,#翻译,#方言",
     "show_in_start": true,
     "no_result_not_show": true
@@ -633,6 +646,19 @@
     "auto_open": false,
     "status": "",
     "tags": "#英语",
+    "show_in_start": true,
+    "no_result_not_show": true
+  },
+  {
+    "base_url": "https://youglish.com/japanese",
+    "title": "YouGlish 日语",
+    "search_url": "https://youglish.com/pronounce/{w}/japanese",
+    "check_method": "get",
+    "not_found_text": "No result found in ",
+    "need_check": true,
+    "auto_open": false,
+    "status": "",
+    "tags": "#日语",
     "show_in_start": true,
     "no_result_not_show": true
   },
