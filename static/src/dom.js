@@ -377,7 +377,7 @@ function escapeHtml(text) {
         '"': '&quot;',
         "'": '&#039;'
     };
-    return text.replace(/[&<>"']/g, m => map[m]);
+    return text.replaceAll(/[&<>"']/g, m => map[m]);
 }
 
 
