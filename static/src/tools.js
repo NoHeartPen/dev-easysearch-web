@@ -1,6 +1,18 @@
 // 纯工具模块，无任何依赖关系
 
 /**
+ * 通过假名判断是否是日语
+ * @param {string} text 需要判断语种的文本
+ * @returns {boolean}
+ */
+export function hasJapanese(text) {
+    if (!text) return false;
+    // 平假名 3040-309F，片假名 30A0-30FF，日文标点 3000-303F，常用汉字 4E00-9FFF
+    // 注意：中文也在 4E00-9FFF，因此为了“没有日语字符时走英语逻辑”，这里只要命中假名就判定为日语存在
+    return /[\u3040-\u30FF]/.test(text);
+}
+
+/**
  * 获取光标处附近的英文单词
  * @param {string} textareaText 文本框内容
  * @param {number} position 光标位置

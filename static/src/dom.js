@@ -9,7 +9,7 @@ import {
     updateData2Db,
 } from 'static/src/db';
 import {doFullAnalyze, doWordAnalyze} from 'static/src/apifetch';
-import {getCursorEnglishWord} from 'static/src/tools';
+import {getCursorEnglishWord, hasJapanese} from 'static/src/tools';
 
 /**
  * 基于用户的输入重新渲染链接，渲染后的链接直接指向搜索地址
@@ -331,7 +331,15 @@ function monitorCursorPositionAndAnalyze() {
         lastCursorPosition = currentCursorPosition;
         // 用户输入文字时自动提交已经输入的文字到后台进行分析
         const contextInputText = this.value;
-        if (currentCursorPosition === contextInputText.length) {
+
+          if (!hasJapanese(contextInputText)) {
+              // 如果不含假名，那么视为英语
+              let wantSearchArray = getCursorEnglishWord(contextInputText, currentCursorPosition);
+              createWantSearchButtons(wantSearchArray);
+              return;
+          }
+
+          if (currentCursorPosition === contextInputText.length) {
           // 如果光标在语境的最后位置，分析已经输入所有内容
           await analyzeRequest(contextInputText, 'full');
         } else {
@@ -503,7 +511,7 @@ $('#review-table-body').on('click', '.context-cell', function () {
 });
 
 export function initializeEvents() {
-  // 刷新页面自动将光标放在语境框内
+    // 刷新页面自动将光标放在语境框内
   $('#contextInput').focus();
 
   // 打开设置弹窗
