@@ -61,7 +61,9 @@
 
     <div class="form-group d-flex">
         <label for="contextInput"></label>
-        <div class="d-flex flex-column me-2">
+        <textarea class="form-control" id="contextInput" placeholder="在这里输入语境..." rows="3"
+                  autocomplete="off"></textarea>
+        <div class="d-flex flex-column ms-2">
             <button id="pasteButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-clipboard"></i></button>
             <button id="clearButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-trash"></i></button>
             <button id="undoButton" class="btn btn-primary btn-sm mb-1"><i class="bi bi-arrow-counterclockwise"></i>
@@ -76,8 +78,6 @@
                 </ul>
             </div>
         </div>
-        <textarea class="form-control" id="contextInput" placeholder="在这里输入语境..." rows="3"
-                  autocomplete="off"></textarea>
     </div>
     <div class="form-group mt-2">
         <div class="d-flex align-items-center flex-wrap gap-1
