@@ -410,18 +410,20 @@ function renderReviewRecords() {
         const context = log.contextInput || ''; // 搜索时语境框的内容
 
         const tableRow = `
-      <tr>
-        <td>${escapeHtml(word)}</td>
-        <td class="context-cell" data-index="${index}" style="cursor: pointer;">${escapeHtml(context)}</td>
-        <td>
-          <button class="btn btn-info btn-sm copy-record me-2" data-index="${index}" title="复制单词和语境">
-            <i class="bi bi-files"></i>
-          </button>
-          <button class="btn btn-danger btn-sm delete-record" data-index="${index}" title="删除">
-            <i class="bi bi-trash"></i>
-          </button>
-        </td>
-      </tr>
+          <tr>
+            <td class="word-col">${escapeHtml(word)}</td>
+            <td class="context-cell" data-index="${index}" style="cursor: pointer;">${escapeHtml(context)}</td>
+            <td class="actions-cell">
+              <div class="btn-row">
+                <button class="btn btn-info btn-sm copy-record me-2" data-index="${index}" title="复制单词和语境">
+                  <i class="bi bi-files"></i>
+                </button>
+                <button class="btn btn-danger btn-sm delete-record" data-index="${index}" title="删除">
+                  <i class="bi bi-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
     `;
         $reviewTableBody.append(tableRow);
     });

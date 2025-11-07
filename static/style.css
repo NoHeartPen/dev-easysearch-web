@@ -102,3 +102,49 @@ textarea, #wordInput, .result-area, .modal-content {
     flex-wrap: wrap;
 }
 
+
+/* 调整复习表格的样式 */
+.review-table {
+    table-layout: fixed;
+    width: 100%;
+}
+
+
+/* 单词列给出最小宽度，避免被语境列压扁 */
+@media (max-width: 576px) {
+    .review-table .word-col {
+        min-width: 1.6rem;
+    }
+}
+
+/* 单词列给出最小宽度，避免被语境列压扁 */
+.review-table .word-col {
+    width: 30%;
+    word-break: break-all;
+}
+
+/* 语境列继续单行省略，允许压缩 */
+.review-table .context-cell {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* 操作列不换行并尽量窄 */
+.review-table .actions-col,
+.review-table .actions-cell {
+    white-space: nowrap;
+    width: 70px;
+}
+
+
+/* 调整操作列按钮 */
+.review-table .btn-row {
+    display: inline-flex;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.review-table .btn-row .btn {
+    flex: 0 0 auto;
+}
