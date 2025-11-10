@@ -7,7 +7,7 @@
 确保基于以下版本的环境运行项目，否则可能会出现兼容性问题：
 - **Node.js**: >= 16.x
 - **npm**: >= 8.x
-- **Python**: >= 3.10
+- **Python**: >= 3.13
 - **pip**: >= 21.x
 
 ## 全局步骤
@@ -51,10 +51,10 @@ npm run dev
 
 ### 安装依赖
 
-安装后端所需的 Python 依赖：
+后端依赖通过 uv 管理，请安装 uv 后，执行下面的命令：
 
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ### 启动开发模式
@@ -93,24 +93,24 @@ npm install
 
 ### 更新后端依赖
 
-安装依赖更新工具
+使用 uv 更新后端依赖：
 
 ```bash
-pip install pip-tools
+uv sync --upgrade
+
+# 更稳妥的分步命令
+# uv lock --upgrade
+# uv sync
 ```
 
-给当前状态的依赖生成 requirements.txt
+## 使用 Heroku 部署
+
+由于前端使用 npm 打包，所以需要添加如下 buildpacks：
 
 ```bash
-pip-compile requirements.in
+heroku buildpacks:clear
+heroku buildpacks:add -i 1 heroku/nodejs
+heroku buildpacks:add -i 2 heroku/python
 ```
 
-更新依赖版本
-
-```bash
-pip-compile --upgrade requirements.in
-
-pip-compile requirements.in
-
-pip install -r requirements.txt
-```
+也可以在 `Settings` 界面的 `Buildpacks` 的`Add buildpack`按钮手动添加，但注意第一个必须是「heroku/nodejs」，第二个是「heroku/python」。

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "vitest",
     "dev": "webpack --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "heroku-postbuild": "npm run build"
   },
   "author": "",
   "license": "LGPL-3.0-or-later",

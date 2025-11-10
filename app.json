@@ -1,0 +1,9 @@
+{
+  "environments": {
+    "test": {
+      "scripts": {
+        "test": "python -m unittest discover -s test/backend -p 'test_*.py' -v"
+      }
+    }
+  }
+}
