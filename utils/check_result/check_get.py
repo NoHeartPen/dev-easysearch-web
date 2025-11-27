@@ -1,5 +1,8 @@
+import asyncio
 import re
+from typing import Optional
 
+import httpx
 import requests
 
 from .result_info import CountCheckResult
@@ -77,3 +80,43 @@ def do_get_request(headers: dict | None, url: str) -> str:
         }
     result = requests.get(url, headers=headers)
     return result.text
+
+
+async def async_do_get_request(url: str, headers: Optional[dict] = None) -> str:
+    """
+    向网站发起异步 Get 请求，返回网页内容。
+    Args:
+        headers: 发起请求时使用的请求头。
+        url: 需要发起请求的网站，只支持 Get 类型的提交。
+
+    Returns:
+            网站返回的内容。
+    """
+    if headers is None:
+        headers = {"User-Agent": DEFAULT_HEADER}
+    try:
+        async with asyncio.timeout(15.0):
+            async with httpx.AsyncClient(follow_redirects=True) as client:
+                resp = await client.get(url, headers=headers)
+                if resp.status_code == 404 or resp.status_code == 403:
+                    return ""
+
+                resp.raise_for_status()
+                return resp.text
+    except TimeoutError:
+        return ""
+
+
+async def async_get_for_url(
+        url: str,
+        headers: Optional[dict],
+        not_found_text: Optional[str] = None,
+) -> bool:
+    """
+    返回 True 表示“有结果”，False 表示“无结果”。
+    """
+    text = await async_do_get_request(url, headers)
+    if not_found_text:
+        return not_found_text not in text
+    # 未提供任何判定条件时，默认视为“有结果”
+    return True
