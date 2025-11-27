@@ -9,6 +9,7 @@ dependencies = [
     "flask>=3.1.2",
     "gunicorn>=23.0.0",
     "httpx>=0.28.1",
+    "hypercorn>=0.18.0",
     "ipadic>=1.0.0",
     "isort>=7.0.0",
     "mecab-python3>=1.0.10",
