@@ -1,24 +1,24 @@
 import json
 
-import ipadic  # type: ignore
 import MeCab  # type: ignore
-from flask import Flask, jsonify, render_template, request
+import ipadic  # type: ignore
+from quart import Quart, render_template, jsonify, request
 
 from utils.check_result.check_get import get_for_url
 from utils.langs.mecab_utls import get_full_jishokei, get_word_jishokei
 
-app = Flask(__name__)
+app = Quart(__name__)
 
 
 @app.route("/")
-def return_index():
-    return render_template("index.html")
+async def return_index():
+    return await render_template("index.html")
 
 
 @app.route("/search", methods=["POST"])
-def do_check_result():
+async def do_check_result():
     try:
-        input_data: list = request.get_json()  # type: ignore
+        input_data: list = await request.get_json()  # type: ignore
         result_data = {}
         # TODO 多线程处理
         for item in input_data:
@@ -32,7 +32,7 @@ def do_check_result():
 
 
 @app.route("/init-urls", methods=["POST"])
-def do_init_urls() -> dict:
+async def do_init_urls() -> dict:
     """
     返回初始化的网页链接配置
     :return: dict json 格式的网页链接配置文件数据
@@ -43,11 +43,11 @@ def do_init_urls() -> dict:
 
 
 @app.route("/word-analyze", methods=["POST"])
-def word_analyze():
+async def word_analyze():
     """
     分析用户输入的文本，返回其中的第一个单词。
     """
-    data = request.get_json()
+    data = await request.get_json()
     input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_word_jishokei(tagger, input_text)
@@ -55,11 +55,11 @@ def word_analyze():
 
 
 @app.route("/full-analyze", methods=["POST"])
-def full_analyze():
+async def full_analyze():
     """
     分析用户输入的文本，返回其中所有的单词。
     """
-    data = request.get_json()
+    data = await request.json
     input_text = data.get("text", "")
     tagger = MeCab.Tagger(ipadic.MECAB_ARGS)
     jishokei_result = get_full_jishokei(tagger, input_text)
