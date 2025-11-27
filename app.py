@@ -1,10 +1,11 @@
+import asyncio
 import json
 
 import MeCab  # type: ignore
 import ipadic  # type: ignore
 from quart import Quart, render_template, jsonify, request
 
-from utils.check_result.check_get import get_for_url
+from utils.check_result.check_get import async_get_for_url
 from utils.langs.mecab_utls import get_full_jishokei, get_word_jishokei
 
 app = Quart(__name__)
@@ -15,26 +16,40 @@ async def return_index():
     return await render_template("index.html")
 
 
+async def _fetch_all_urls(items: list[dict]) -> list[bool]:
+    """并发获取所有URL的检查结果"""
+    tasks = [
+        async_get_for_url(
+            item["search_url"],
+            headers=None,
+            not_found_text=item.get("not_found_text"),
+        )
+        for item in items
+    ]
+    return await asyncio.gather(*tasks)
+
+
+def _build_result_data(items: list[dict], results: list[bool]) -> dict[str, list]:
+    """构建结果数据字典"""
+    result_data = {}
+    for item, ok in zip(items, results):
+        url_index = str(item["url_index"])
+        result_data[url_index] = [item["search_url"], ok]
+    return result_data
+
+
 @app.route("/search", methods=["POST"])
 async def do_check_result():
     try:
-        input_data: list = await request.get_json()  # type: ignore
-        result_data = {}
-        # TODO 多线程处理
-        for item in input_data:
-            if item["check_method"] == "get":
-                check_result = get_for_url(
-                    item["search_url"],
-                    headers=None,
-                    not_found_text=item["not_found_text"],
-                )
-                result_data.setdefault(
-                    item["url_index"], [item["search_url"], check_result]
-                )
-        return result_data
+        input_data = await request.get_json()
+        filtered_items = [
+            item for item in input_data if item.get("check_method") == "get"
+        ]
+        results = await _fetch_all_urls(filtered_items)
+        return _build_result_data(filtered_items, results)
     except Exception as e:
         print("错误:", e)
-        return (jsonify({""}),)
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/init-urls", methods=["POST"])
