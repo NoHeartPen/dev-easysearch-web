@@ -1,1 +1,1 @@
-web: uvicorn app:app --bind 0.0.0.0:$PORT --workers 1
+web: uvicorn app:app
