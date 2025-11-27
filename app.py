@@ -2,6 +2,7 @@ import asyncio
 import json
 
 import MeCab  # type: ignore
+import anyio
 import ipadic  # type: ignore
 from quart import Quart, render_template, jsonify, request
 
@@ -58,9 +59,8 @@ async def do_init_urls() -> dict:
     返回初始化的网页链接配置
     :return: dict json 格式的网页链接配置文件数据
     """
-    with open("static/init-url.json", "r") as f:
-        data = json.load(f)
-        return data
+    async with await anyio.open_file("static/init-url.json", "r") as f:
+        return json.loads(await f.read())
 
 
 @app.route("/word-analyze", methods=["POST"])
