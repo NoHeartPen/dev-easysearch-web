@@ -23,8 +23,14 @@ async def do_check_result():
         # TODO 多线程处理
         for item in input_data:
             if item["check_method"] == "get":
-                check_result = get_for_url(item["search_url"], headers=None, not_found_text=item["not_found_text"])
-                result_data.setdefault(item["url_index"], [item["search_url"], check_result])
+                check_result = get_for_url(
+                    item["search_url"],
+                    headers=None,
+                    not_found_text=item["not_found_text"],
+                )
+                result_data.setdefault(
+                    item["url_index"], [item["search_url"], check_result]
+                )
         return result_data
     except Exception as e:
         print("错误:", e)
