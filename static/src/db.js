@@ -273,7 +273,7 @@ async function getUsedIndexes() {
         const keys = await localforage.keys();
         const usedIndexes = new Set();
         keys.forEach(function (key) {
-            usedIndexes.add(parseInt(key, 10));
+            usedIndexes.add(Number.parseInt(key, 10));
         });
         console.log('已使用的索引:', Array.from(usedIndexes));
         // 获取下一个可用的索引
