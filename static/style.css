@@ -1,5 +1,6 @@
 body {
-    background-color: #f8f9fa;
+    background-color: var(--background-color, #f8f9fa);
+    color: var(--text-color);
 }
 
 .container {
@@ -77,11 +78,6 @@ footer {
     --text-color: black;
     --input-background-color: white;
     --input-text-color: black;
-}
-
-body {
-    background-color: var(--background-color);
-    color: var(--text-color);
 }
 
 textarea, #wordInput, .result-area, .modal-content {
