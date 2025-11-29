@@ -229,7 +229,7 @@ export function checkDb() {
     localforage.config({
         driver: localforage.INDEXEDDB,
         name: 'easySearch',
-        version: 1.0,
+        version: 1,
         storeName: 'userData',
         description: '用户数据存储'
     })
