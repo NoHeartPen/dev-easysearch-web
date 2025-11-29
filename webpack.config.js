@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('node:path');
 module.exports = {
     entry: 'static/src/script.js', // 入口文件
     output: {
