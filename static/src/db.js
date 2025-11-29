@@ -334,7 +334,7 @@ function downloadJsonFile(transformedData) {
     a.download = `easy_search_links_data_${formattedDate}.json`;
     document.body.appendChild(a);
     a.click();
-    document.body.removeChild(a);
+    a.remove();
     URL.revokeObjectURL(url);
 }
 
