@@ -224,7 +224,7 @@ function doubleClickSearch() {
       // 如果已经计数到 2，查找单词
       if (pressCount === 2) {
         // 判断是否选中了文本
-        let wantSearchText = window.getSelection().toString();
+          let wantSearchText = globalThis.getSelection().toString();
         // 保存推断
         let wantSearchArray = [];
         if (wantSearchText === '') {
