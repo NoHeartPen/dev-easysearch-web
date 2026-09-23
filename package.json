@@ -18,7 +18,7 @@
   "devDependencies": {
     "@vitest/coverage-istanbul": "^5.0.1",
     "@vitest/coverage-v8": "^5.0.1",
-    "copy-webpack-plugin": "^13.0.1",
+    "copy-webpack-plugin": "^14.0.0",
     "vi-fetch": "^0.8.0",
     "vitest": "^5.0.1",
     "webpack": "^5.102.1",
